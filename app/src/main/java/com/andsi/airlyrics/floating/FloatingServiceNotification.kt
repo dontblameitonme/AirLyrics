@@ -45,7 +45,8 @@ internal object FloatingServiceNotification {
         val contentText = state.feedback?.let { "$summary · $it" } ?: summary
         val accentColor = ThemeAccentPalettes.resolve(
             accent = ThemeSettingsStore.getAccent(context),
-            isDark = ThemeSettingsStore.isDark(context)
+            isDark = ThemeSettingsStore.isDark(context),
+            seed = ThemeSettingsStore.resolveSeed(context)
         ).accent
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)

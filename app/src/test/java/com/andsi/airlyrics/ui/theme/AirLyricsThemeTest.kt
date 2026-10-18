@@ -25,11 +25,13 @@ class AirLyricsThemeTest {
 
     @Test
     fun everyAccentHasDistinctLightAndDarkPrimaryColors() {
-        val lightColors = ThemeAccent.entries.map { AirLyricsTheme.palette(isDark = false, it).accent }
-        val darkColors = ThemeAccent.entries.map { AirLyricsTheme.palette(isDark = true, it).accent }
+        // Wallpaper and album-art accents need a runtime seed; without one they fall back to pink.
+        val fixed = ThemeAccent.entries.filter { it != ThemeAccent.DYNAMIC && it != ThemeAccent.COVER }
+        val lightColors = fixed.map { AirLyricsTheme.palette(isDark = false, it).accent }
+        val darkColors = fixed.map { AirLyricsTheme.palette(isDark = true, it).accent }
 
-        assertEquals(ThemeAccent.entries.size, lightColors.distinct().size)
-        assertEquals(ThemeAccent.entries.size, darkColors.distinct().size)
+        assertEquals(fixed.size, lightColors.distinct().size)
+        assertEquals(fixed.size, darkColors.distinct().size)
         ThemeAccent.entries.forEach { accent ->
             assertNotEquals(
                 AirLyricsTheme.palette(isDark = false, accent).accent,
@@ -76,5 +78,21 @@ class AirLyricsThemeTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun tonalAccentsMapTheWholePaletteFromTheSeed() {
+        listOf(false, true).forEach { isDark ->
+            val seeded = AirLyricsTheme.palette(isDark, ThemeAccent.COVER, seed = 0xFF1E88E5.toInt())
+            val other = AirLyricsTheme.palette(isDark, ThemeAccent.COVER, seed = 0xFFE53935.toInt())
+            assertNotEquals(seeded.accent, other.accent)
+            assertNotEquals(seeded.background, other.background)
+            assertTrue(ColorUtils.calculateContrast(seeded.textStrong, seeded.background) >= 7.0)
+            assertTrue(ColorUtils.calculateContrast(seeded.text, seeded.card) >= 4.5)
+        }
+        assertEquals(
+            AirLyricsTheme.palette(false, ThemeAccent.PINK),
+            AirLyricsTheme.palette(false, ThemeAccent.DYNAMIC)
+        )
     }
 }

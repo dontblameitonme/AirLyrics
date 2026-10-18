@@ -131,20 +131,24 @@ private class SettingsAppearanceHeader(
                 setTextColor(host.colorTextMuted)
             })
 
-            addView(LinearLayout(host).apply {
-                orientation = HORIZONTAL
-                gravity = Gravity.CENTER
-                setPadding(0, host.dp(AirUiTokens.Space.Xl), 0, 0)
-                ThemeAccent.entries.forEach { accent ->
-                    addView(createAccentSwatch(accent))
-                }
-            })
+            host.availableThemeAccents().chunked(SWATCHES_PER_ROW).forEachIndexed { rowIndex, rowAccents ->
+                addView(LinearLayout(host).apply {
+                    orientation = HORIZONTAL
+                    gravity = Gravity.CENTER
+                    setPadding(0, host.dp(if (rowIndex == 0) AirUiTokens.Space.Xl else AirUiTokens.Space.Sm), 0, 0)
+                    rowAccents.forEach { accent -> addView(createAccentSwatch(accent)) }
+                    // Keep swatch widths equal on a partially filled last row.
+                    repeat(SWATCHES_PER_ROW - rowAccents.size) {
+                        addView(View(host), LayoutParams(0, 0, 1f))
+                    }
+                })
+            }
         }
     }
 
     private fun createAccentSwatch(accent: ThemeAccent): View {
         val selected = accent == host.themeAccent()
-        val palette = AirLyricsTheme.palette(host.isDarkTheme(), accent)
+        val palette = AirLyricsTheme.palette(host.isDarkTheme(), accent, host.themeSeedFor(accent))
         val colorName = accent.displayName(host)
 
         return FrameLayout(host).apply {
@@ -175,9 +179,15 @@ private class SettingsAppearanceHeader(
                     host.dp(AirUiTokens.Layout.ThemeAccentSwatchSize),
                     Gravity.CENTER
                 )
-                if (selected) {
+                val badgeIcon = when {
+                    selected -> R.drawable.ic_air_check
+                    accent == ThemeAccent.DYNAMIC -> R.drawable.ic_air_auto_awesome
+                    accent == ThemeAccent.COVER -> R.drawable.ic_air_music_note
+                    else -> 0
+                }
+                if (badgeIcon != 0) {
                     addView(host.airIconView(
-                        R.drawable.ic_air_check,
+                        badgeIcon,
                         iconColorOnAccent(palette.onAccent)
                     ).apply {
                         layoutParams = FrameLayout.LayoutParams(
@@ -293,14 +303,29 @@ private class SettingsAppearanceHeader(
     }
 }
 
-private fun ThemeAccent.displayName(host: MainUiHost): String {
-    return host.getString(
-        when (this) {
-            ThemeAccent.PINK -> R.string.ui_pink
-            ThemeAccent.ORANGE -> R.string.ui_orange
-            ThemeAccent.GREEN -> R.string.ui_green
-            ThemeAccent.BLUE -> R.string.ui_blue
-            ThemeAccent.PURPLE -> R.string.ui_purple
-        }
-    )
+private const val SWATCHES_PER_ROW = 6
+
+internal fun ThemeAccent.displayName(host: MainUiHost): String {
+    return host.getString(themeAccentNameRes(this))
+}
+
+internal fun themeAccentNameRes(accent: ThemeAccent): Int = when (accent) {
+    ThemeAccent.PINK -> R.string.ui_pink
+    ThemeAccent.ORANGE -> R.string.ui_orange
+    ThemeAccent.GREEN -> R.string.ui_green
+    ThemeAccent.BLUE -> R.string.ui_blue
+    ThemeAccent.PURPLE -> R.string.ui_purple
+    ThemeAccent.DYNAMIC -> R.string.ui_accent_dynamic
+    ThemeAccent.COVER -> R.string.ui_accent_cover
+    ThemeAccent.TEAL -> R.string.ui_accent_teal
+    ThemeAccent.SKY -> R.string.ui_accent_sky
+    ThemeAccent.INDIGO -> R.string.ui_accent_indigo
+    ThemeAccent.GRAPE -> R.string.ui_accent_grape
+    ThemeAccent.ROSE -> R.string.ui_accent_rose
+    ThemeAccent.CORAL -> R.string.ui_accent_coral
+    ThemeAccent.AMBER -> R.string.ui_accent_amber
+    ThemeAccent.LIME -> R.string.ui_accent_lime
+    ThemeAccent.FOREST -> R.string.ui_accent_forest
+    ThemeAccent.SLATE -> R.string.ui_accent_slate
+    ThemeAccent.COCOA -> R.string.ui_accent_cocoa
 }

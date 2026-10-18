@@ -16,7 +16,9 @@ internal data class AiSongIntroRequest(
     val title: String,
     val artist: String,
     val album: String,
-    val lyrics: String
+    val lyrics: String,
+    /** Pre-formatted web search results, or null when search is off. */
+    val search: String? = null
 )
 
 internal class AiSongIntroException(message: String) : IOException(message)
@@ -96,16 +98,35 @@ internal object AiSongIntroClient {
             )
             .toString()
 
-    /** Replaces {title}, {artist}, {album} and {lyrics}; unknown braces are left untouched. */
+    /**
+     * Replaces {title}, {artist}, {album}, {lyrics} and {search}; unknown braces are left
+     * untouched. Search results are appended when the template has no {search} placeholder.
+     */
     internal fun renderPrompt(template: String, request: AiSongIntroRequest): String {
         val lyrics = request.lyrics.trim().let {
             if (it.length > MAX_LYRICS_CHARS) it.take(MAX_LYRICS_CHARS) + "…" else it
         }
-        return template
+        val search = request.search?.trim().orEmpty()
+        val rendered = template
             .replace("{title}", request.title.trim())
             .replace("{artist}", request.artist.trim())
             .replace("{album}", request.album.trim())
             .replace("{lyrics}", lyrics)
+        return when {
+            template.contains("{search}") -> rendered.replace("{search}", search)
+            search.isNotEmpty() -> rendered.trimEnd() + "\n\n" + search
+            else -> rendered
+        }
+    }
+
+    /** Numbered result list the model can cite as [1], [2]…; [header] explains how to use it. */
+    internal fun formatSearchResults(header: String, results: List<WebSearchResult>): String = buildString {
+        append(header.trim())
+        results.forEachIndexed { index, result ->
+            append("\n\n[").append(index + 1).append("] ").append(result.title.trim())
+            append("\n").append(result.url)
+            if (result.snippet.isNotBlank()) append("\n").append(result.snippet.trim())
+        }
     }
 
     /** Extracts the text delta from one Server-Sent Events line, or null. */

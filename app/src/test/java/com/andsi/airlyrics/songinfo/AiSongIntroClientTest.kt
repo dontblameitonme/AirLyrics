@@ -16,6 +16,32 @@ class AiSongIntroClientTest {
     }
 
     @Test
+    fun searchPlaceholderIsReplacedInPlace() {
+        val prompt = AiSongIntroClient.renderPrompt("A {search} B", request.copy(search = "RESULTS"))
+        assertEquals("A RESULTS B", prompt)
+        assertEquals("A  B", AiSongIntroClient.renderPrompt("A {search} B", request))
+    }
+
+    @Test
+    fun searchResultsAreAppendedWhenTemplateHasNoPlaceholder() {
+        val prompt = AiSongIntroClient.renderPrompt("Intro {title}\n", request.copy(search = "RESULTS"))
+        assertEquals("Intro 晴天\n\nRESULTS", prompt)
+        assertEquals("Intro 晴天\n", AiSongIntroClient.renderPrompt("Intro {title}\n", request))
+    }
+
+    @Test
+    fun formatsNumberedSearchResults() {
+        val text = AiSongIntroClient.formatSearchResults(
+            "Header:",
+            listOf(
+                WebSearchResult("First", "https://a.example/1", "Snippet one"),
+                WebSearchResult("Second", "https://b.example/2", "")
+            )
+        )
+        assertEquals("Header:\n\n[1] First\nhttps://a.example/1\nSnippet one\n\n[2] Second\nhttps://b.example/2", text)
+    }
+
+    @Test
     fun truncatesLongLyrics() {
         val prompt = AiSongIntroClient.renderPrompt("{lyrics}", request.copy(lyrics = "a".repeat(5_000)))
         assertTrue(prompt.length in 3_000..3_001)

@@ -15,6 +15,16 @@ internal object AppNightMode {
         applyMode(enabled)
     }
 
+    /** null follows the system; true/false force dark/light. */
+    fun setMode(context: Context, darkModeOverride: Boolean?) {
+        if (darkModeOverride == null) {
+            ThemeSettingsStore.setFollowSystem(context)
+        } else {
+            ThemeSettingsStore.setDark(context, darkModeOverride)
+        }
+        applyMode(darkModeOverride)
+    }
+
     private fun applyMode(darkModeOverride: Boolean?) {
         val mode = when (darkModeOverride) {
             true -> AppCompatDelegate.MODE_NIGHT_YES

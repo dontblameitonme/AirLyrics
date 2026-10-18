@@ -7,7 +7,7 @@ import com.andsi.airlyrics.ui.model.MainUiHost
 private const val ON_ACCENT_ICON_ALPHA = 204
 
 internal val MainUiHost.airLyricsPalette: AirLyricsPalette
-    get() = AirLyricsTheme.palette(isDarkTheme(), themeAccent())
+    get() = AirLyricsTheme.palette(isDarkTheme(), themeAccent(), themeSeed())
 
 internal val MainUiHost.colorBackground: Int
     get() = airLyricsPalette.background

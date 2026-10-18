@@ -140,8 +140,11 @@ internal class MainViewModel(
 
     fun navigateBack(): Boolean {
         val state = _uiState.value
+        if (state.currentPage == Page.LYRICS) return false
         if (state.currentPage != Page.SETTINGS || state.settingsSubPage == SettingsSubPage.HOME) {
-            return false
+            // Without a tab bar every secondary page returns to the lyrics home page.
+            selectPage(Page.LYRICS)
+            return true
         }
         updateState {
             it.copy(settingsSubPage = it.settingsSubPage.parentPage() ?: SettingsSubPage.HOME)
@@ -643,7 +646,7 @@ internal class MainViewModel(
     private fun restoredState(): MainScreenState {
         val currentPage = savedStateHandle.get<String>(KEY_CURRENT_PAGE)
             ?.let { runCatching { Page.valueOf(it) }.getOrNull() }
-            ?: Page.MEDIA
+            ?: Page.LYRICS
         val settingsSubPage = savedStateHandle.get<String>(KEY_SETTINGS_SUB_PAGE)
             ?.let { runCatching { SettingsSubPage.valueOf(it) }.getOrNull() }
             ?: SettingsSubPage.HOME

@@ -63,27 +63,18 @@ internal class AdaptiveWindowLayout(private val host: MainUiHost, private val co
         val density = resources.displayMetrics.density
         val useRail = availableWidth / density >= 600f
         configureNavigation(useRail)
-        val nav = navigation
-        val navWidth = if (useRail) host.dp(WindowLayoutSpec.RAIL).coerceAtMost(availableWidth) else availableWidth
-        nav.measure(MeasureSpec.makeMeasureSpec(navWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(availableHeight, if (useRail) MeasureSpec.EXACTLY else MeasureSpec.AT_MOST))
-        val contentHeight = (availableHeight - if (useRail) 0 else nav.measuredHeight).coerceAtLeast(0)
-        updateWindowSpec(availableWidth / density, contentHeight / density)
-        content.measure(MeasureSpec.makeMeasureSpec((availableWidth - if (useRail) navWidth else 0).coerceAtLeast(0), MeasureSpec.EXACTLY),
-            MeasureSpec.makeMeasureSpec((availableHeight - if (useRail) 0 else nav.measuredHeight).coerceAtLeast(0), MeasureSpec.EXACTLY))
+        // The lyrics page is the home screen; other pages open from its menu, so the
+        // tab bar / rail stays hidden and reserves no space.
+        navigation.visibility = GONE
+        updateWindowSpec(availableWidth / density, availableHeight / density)
+        content.measure(
+            MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(availableHeight, MeasureSpec.EXACTLY)
+        )
         setMeasuredDimension(width, height)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        val nav = navigation
-        val rtl = layoutDirection == LAYOUT_DIRECTION_RTL
-        if (rail == true) {
-            val navX = if (rtl) width - paddingRight - nav.measuredWidth else paddingLeft
-            val contentX = if (rtl) paddingLeft else paddingLeft + nav.measuredWidth
-            nav.layout(navX, paddingTop, navX + nav.measuredWidth, height - paddingBottom)
-            content.layout(contentX, paddingTop, contentX + content.measuredWidth, height - paddingBottom)
-        } else {
-            content.layout(paddingLeft, paddingTop, width - paddingRight, paddingTop + content.measuredHeight)
-            nav.layout(paddingLeft, height - paddingBottom - nav.measuredHeight, width - paddingRight, height - paddingBottom)
-        }
+        content.layout(paddingLeft, paddingTop, width - paddingRight, paddingTop + content.measuredHeight)
     }
 }

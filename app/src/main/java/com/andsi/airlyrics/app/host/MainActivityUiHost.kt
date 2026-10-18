@@ -159,6 +159,10 @@ internal class MainActivityUiHost(
     override fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
     override fun isDarkTheme(): Boolean = ThemeSettingsStore.isDark(this)
     override fun themeAccent(): ThemeAccent = ThemeSettingsStore.getAccent(this)
+    override fun themeSeedFor(accent: ThemeAccent): Int? = ThemeSettingsStore.resolveSeed(this, accent)
+    override fun availableThemeAccents(): List<ThemeAccent> = ThemeAccent.entries.filter {
+        it != ThemeAccent.DYNAMIC || ThemeSettingsStore.isDynamicColorAvailable()
+    }
 
     override fun getActiveMediaControllers(): List<MediaController> = graph.mediaSourceController.getActiveControllers()
     override fun mediaPageState(): MediaPageState {
@@ -189,14 +193,30 @@ internal class MainActivityUiHost(
     override fun aiIntroSettings(): com.andsi.airlyrics.ui.model.AiIntroSettingsUi = nowPlayingExtras.aiSettings()
     override fun saveAiIntroSettings(settings: com.andsi.airlyrics.ui.model.AiIntroSettingsUi) =
         nowPlayingExtras.saveAiSettings(settings)
+    override fun defaultAiPrompts(): List<com.andsi.airlyrics.ui.model.AiPromptUi> = nowPlayingExtras.defaultPrompts()
+    override fun aiSelectedPromptId(): String? = nowPlayingExtras.selectedPromptId()
+    override fun setAiSelectedPromptId(id: String) = nowPlayingExtras.setSelectedPromptId(id)
+    override fun aiWebSearchOn(): Boolean = nowPlayingExtras.webSearchOn()
+    override fun setAiWebSearchOn(on: Boolean) = nowPlayingExtras.setWebSearchOn(on)
+    override fun setDefaultSearchEngine(engine: com.andsi.airlyrics.ui.model.SearchEngineUi) =
+        nowPlayingExtras.setDefaultSearchEngine(engine)
     override fun streamAiSongIntro(
         track: com.andsi.airlyrics.ui.model.NowPlayingTrackUi,
         lyricsText: String,
+        prompt: com.andsi.airlyrics.ui.model.AiPromptUi,
+        webSearch: Boolean,
+        onProgress: (com.andsi.airlyrics.ui.model.AiIntroProgressUi) -> Unit,
         onDelta: (String) -> Unit,
         onFinished: (Throwable?) -> Unit
-    ): com.andsi.airlyrics.ui.model.UiRequestHandle = nowPlayingExtras.streamIntro(track, lyricsText, onDelta, onFinished)
+    ): com.andsi.airlyrics.ui.model.UiRequestHandle =
+        nowPlayingExtras.streamIntro(track, lyricsText, prompt, webSearch, onProgress, onDelta, onFinished)
     override fun nowPlayingTranslationVisible(): Boolean = nowPlayingExtras.translationVisible()
     override fun setNowPlayingTranslationVisible(visible: Boolean) = nowPlayingExtras.setTranslationVisible(visible)
+    override fun onNowPlayingArtwork(artwork: android.graphics.Bitmap?) {
+        nowPlayingExtras.coverSeed(artwork) { seed -> updateCoverSeed(seed) }
+    }
+    override fun themeDarkOverride(): Boolean? = ThemeSettingsStore.getDarkModeOverride(this)
+    override fun setThemeDarkOverride(dark: Boolean?) = setThemeMode(dark)
     override fun getPlaybackStateText(state: Int?): String = graph.mediaSourceController.getPlaybackStateText(state)
     override fun runOnAppIo(block: () -> Unit) = graph.runOnAppIo(block)
     override fun runOnMainThread(block: () -> Unit) = graph.runOnMainThread(block)
@@ -549,6 +569,20 @@ internal class MainActivityUiHost(
 
     fun toggleThemeMode() {
         AppNightMode.setDark(this, enabled = !isDarkTheme())
+    }
+
+    /** null = follow system. */
+    fun setThemeMode(darkOverride: Boolean?) {
+        if (darkOverride == ThemeSettingsStore.getDarkModeOverride(this)) return
+        AppNightMode.setMode(this, darkOverride)
+    }
+
+    /** Called when the current artwork yields a new seed; repaints only when the cover accent is active. */
+    fun updateCoverSeed(seed: Int) {
+        val changed = ThemeSettingsStore.setCoverSeed(this, seed)
+        if (changed && themeAccent() == ThemeAccent.COVER) {
+            applyPaletteChange { }
+        }
     }
 
     fun selectThemeAccent(accent: ThemeAccent) {

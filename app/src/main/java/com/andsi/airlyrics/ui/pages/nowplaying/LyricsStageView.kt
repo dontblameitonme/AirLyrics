@@ -40,6 +40,9 @@ internal class LyricsStageView(context: Context) : View(context) {
     private val messagePaint = TextPaint(TextPaint.ANTI_ALIAS_FLAG).apply {
         textSize = 17f * scaledDensity
     }
+    private val footerPaint = TextPaint(TextPaint.ANTI_ALIAS_FLAG).apply {
+        textSize = 12f * scaledDensity
+    }
     private val horizontalPadding = 28f * density
     private val lineGap = 22f * density
     private val translationGap = 4f * density
@@ -49,6 +52,12 @@ internal class LyricsStageView(context: Context) : View(context) {
     private var laidOut: List<LaidOutLine> = emptyList()
     private var messageLayout: StaticLayout? = null
     private var textColor = 0xFF000000.toInt()
+    private var footerColor = 0x99000000.toInt()
+
+    /** Provider credit drawn as the last "line", after the final lyric. */
+    private var footer: CharSequence? = null
+    private var footerLayout: StaticLayout? = null
+    private var footerTop = 0f
 
     private var activeIndex = -1
     private var scrollY = 0f
@@ -88,6 +97,11 @@ internal class LyricsStageView(context: Context) : View(context) {
         invalidate()
     }
 
+    fun setFooterColor(color: Int) {
+        footerColor = color
+        invalidate()
+    }
+
     var showTranslation: Boolean = true
         set(value) {
             if (field == value) return
@@ -97,8 +111,9 @@ internal class LyricsStageView(context: Context) : View(context) {
             invalidate()
         }
 
-    fun showLines(newLines: List<NowPlayingLineUi>) {
-        if (newLines == lines && message == null) return
+    fun showLines(newLines: List<NowPlayingLineUi>, attribution: CharSequence? = null) {
+        if (newLines == lines && message == null && attribution?.toString() == footer?.toString()) return
+        footer = attribution?.takeIf { it.isNotBlank() }
         lines = newLines
         message = null
         activeIndex = -1
@@ -110,6 +125,7 @@ internal class LyricsStageView(context: Context) : View(context) {
     fun showMessage(text: String) {
         if (message == text) return
         message = text
+        footer = null
         lines = emptyList()
         laidOut = emptyList()
         activeIndex = -1
@@ -181,6 +197,16 @@ internal class LyricsStageView(context: Context) : View(context) {
             }
             canvas.restore()
         }
+        footerLayout?.let { layout ->
+            val top = footerTop - scrollY
+            if (top < height && top + layout.height > 0) {
+                footerPaint.color = footerColor
+                canvas.save()
+                canvas.translate(horizontalPadding, top)
+                layout.draw(canvas)
+                canvas.restore()
+            }
+        }
         if (isFollowing() && abs(scrollY - targetScrollFor(max(activeIndex, 0))) > 0.5f) {
             postInvalidateOnAnimation()
         }
@@ -206,7 +232,11 @@ internal class LyricsStageView(context: Context) : View(context) {
 
     private fun minScroll(): Float = -height * FOCUS_FRACTION
 
-    private fun maxScroll(): Float = laidOut.lastOrNull()?.let { it.top + it.height - height * FOCUS_FRACTION } ?: 0f
+    private fun maxScroll(): Float {
+        val footerBottom = footerLayout?.let { footerTop + it.height } ?: 0f
+        val linesBottom = laidOut.lastOrNull()?.let { it.top + it.height } ?: 0f
+        return max(footerBottom, linesBottom) - height * FOCUS_FRACTION
+    }
 
     private fun relayout() {
         val width = (width - horizontalPadding * 2).toInt()
@@ -225,6 +255,13 @@ internal class LyricsStageView(context: Context) : View(context) {
             LaidOutLine(line, text, translation, top, height).also {
                 top += height + lineGap
             }
+        }
+        footerLayout = footer?.let { credit ->
+            footerTop = top + lineGap * 0.5f
+            StaticLayout.Builder.obtain(credit, 0, credit.length, footerPaint, width)
+                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                .setIncludePad(false)
+                .build()
         }
     }
 

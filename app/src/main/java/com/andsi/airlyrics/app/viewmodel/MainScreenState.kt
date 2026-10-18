@@ -42,7 +42,7 @@ internal data class ForegroundUiSnapshot(
 
 /** Immutable state for the logical main screen, retained across Activity recreation. */
 internal data class MainScreenState(
-    override val currentPage: Page = Page.MEDIA,
+    override val currentPage: Page = Page.LYRICS,
     override val settingsSubPage: SettingsSubPage = SettingsSubPage.HOME,
     override val savedLyricsSearchOpen: Boolean = false,
     override val savedLyricsSearchQuery: String = "",

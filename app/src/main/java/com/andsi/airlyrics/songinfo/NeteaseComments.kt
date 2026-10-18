@@ -122,8 +122,8 @@ internal object NeteaseCommentsClient {
 /** Scores NetEase search results against the player's metadata. */
 internal object NeteaseSongMatcher {
     private val versionMarkers = listOf(
-        "cover", "翻唱", "翻自", "原唱", "伴奏", "instrumental", "karaoke", "live", "现场", "remix", "dj", "铃声", "纯音乐",
-        "钢琴", "吉他", "piano", "guitar", "女声", "男声", "版", "加速", "降调", "sped up", "slowed"
+        "cover", "\u7ffb\u5531", "\u7ffb\u81ea", "\u539f\u5531", "\u4f34\u594f", "instrumental", "karaoke", "live", "\u73b0\u573a", "remix", "dj", "\u94c3\u58f0", "\u7eaf\u97f3\u4e50",
+        "\u94a2\u7434", "\u5409\u4ed6", "piano", "guitar", "\u5973\u58f0", "\u7537\u58f0", "\u7248", "\u52a0\u901f", "\u964d\u8c03", "sped up", "slowed"
     )
 
     fun best(songs: List<NeteaseSong>, title: String, artist: String, durationMs: Long): NeteaseSong? =

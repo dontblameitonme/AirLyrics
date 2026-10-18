@@ -74,13 +74,43 @@ internal data class SongCommentsPageUi(
     val hasMore: Boolean
 )
 
+internal data class AiPromptUi(
+    val id: String,
+    val name: String,
+    val template: String
+)
+
+internal enum class SearchEngineUi { BING, GOOGLE, TINYFISH, CUSTOM }
+
 internal data class AiIntroSettingsUi(
     val baseUrl: String,
     val model: String,
     val apiKey: String,
-    val prompt: String,
-    val defaultPrompt: String
+    val prompts: List<AiPromptUi>,
+    val searchEngine: SearchEngineUi,
+    val enabledEngines: Set<SearchEngineUi>,
+    val resultCount: Int,
+    val googleApiKey: String,
+    val googleCx: String,
+    val tinyFishApiKey: String,
+    val customUrl: String,
+    val customHeaderName: String,
+    val customHeaderValue: String
 )
+
+internal data class AiSourceUi(
+    val title: String,
+    val url: String,
+    val site: String?
+)
+
+/** Progress of one AI request, reported before and while the reply streams. */
+internal sealed interface AiIntroProgressUi {
+    data class Searching(val engine: SearchEngineUi) : AiIntroProgressUi
+    data class Searched(val engine: SearchEngineUi, val sources: List<AiSourceUi>) : AiIntroProgressUi
+    data class SearchFailed(val engine: SearchEngineUi, val message: String) : AiIntroProgressUi
+    data object Generating : AiIntroProgressUi
+}
 
 /** Handle for a background request started by the page; cancel when the UI goes away. */
 internal fun interface UiRequestHandle {
@@ -100,15 +130,31 @@ internal interface NowPlayingUiHost {
 
     fun aiIntroSettings(): AiIntroSettingsUi
     fun saveAiIntroSettings(settings: AiIntroSettingsUi)
+    fun defaultAiPrompts(): List<AiPromptUi>
+    fun aiSelectedPromptId(): String?
+    fun setAiSelectedPromptId(id: String)
+    fun aiWebSearchOn(): Boolean
+    fun setAiWebSearchOn(on: Boolean)
+    fun setDefaultSearchEngine(engine: SearchEngineUi)
 
-    /** Streams the AI reply; [onDelta] and [onFinished] run on the main thread. */
+    /** Optionally searches the web, then streams the reply; callbacks run on the main thread. */
     fun streamAiSongIntro(
         track: NowPlayingTrackUi,
         lyricsText: String,
+        prompt: AiPromptUi,
+        webSearch: Boolean,
+        onProgress: (AiIntroProgressUi) -> Unit,
         onDelta: (String) -> Unit,
         onFinished: (Throwable?) -> Unit
     ): UiRequestHandle
 
     fun nowPlayingTranslationVisible(): Boolean
     fun setNowPlayingTranslationVisible(visible: Boolean)
+
+    /** Lets the cover-art accent follow the current artwork. */
+    fun onNowPlayingArtwork(artwork: Bitmap?)
+
+    /** null = follow system. */
+    fun themeDarkOverride(): Boolean?
+    fun setThemeDarkOverride(dark: Boolean?)
 }

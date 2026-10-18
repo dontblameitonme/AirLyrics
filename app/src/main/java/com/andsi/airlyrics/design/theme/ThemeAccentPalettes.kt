@@ -4,7 +4,13 @@ import com.andsi.airlyrics.core.model.ThemeAccent
 
 /** Shared light/dark accent tones for UI surfaces and platform integrations. */
 internal object ThemeAccentPalettes {
-    fun resolve(accent: ThemeAccent, isDark: Boolean): ThemeAccentColors {
+    /** [seed] is required for [ThemeAccent.DYNAMIC] and [ThemeAccent.COVER]; null falls back to pink. */
+    fun resolve(accent: ThemeAccent, isDark: Boolean, seed: Int? = null): ThemeAccentColors {
+        if (accent.isTonal) {
+            val resolvedSeed = seed ?: TonalScheme.presetSeed(accent) ?: return resolve(ThemeAccent.DEFAULT, isDark)
+            val scheme = TonalScheme.of(resolvedSeed, isDark)
+            return ThemeAccentColors(scheme.primary, scheme.onPrimary, scheme.primaryContainer)
+        }
         return if (isDark) dark(accent) else light(accent)
     }
 
@@ -35,6 +41,7 @@ internal object ThemeAccentPalettes {
                 onAccent = 0xFF251A3B.toInt(),
                 accentLight = 0xFFBBA2EA.toInt()
             )
+            else -> error("tonal accent")
         }
     }
 
@@ -65,6 +72,7 @@ internal object ThemeAccentPalettes {
                 onAccent = 0xFF302348.toInt(),
                 accentLight = 0xFFC8AEF5.toInt()
             )
+            else -> error("tonal accent")
         }
     }
 }

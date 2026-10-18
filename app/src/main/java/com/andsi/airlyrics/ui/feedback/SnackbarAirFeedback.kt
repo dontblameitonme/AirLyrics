@@ -164,7 +164,9 @@ internal class SnackbarAirFeedback(
         messageView.ellipsize = null
         val availableWidth = (anchor.rootView.width - snackbar.view.paddingLeft - snackbar.view.paddingRight).coerceAtLeast(1)
         snackbar.view.measure(View.MeasureSpec.makeMeasureSpec(availableWidth, View.MeasureSpec.AT_MOST), View.MeasureSpec.UNSPECIFIED)
-        val availableHeight = anchor.rootView.height - anchor.height - snackbar.view.paddingTop - snackbar.view.paddingBottom
+        // Without a bottom bar the anchor can fill the whole window; then the window height is the limit.
+        val outsideAnchor = (anchor.rootView.height - anchor.height).takeIf { it > 0 } ?: anchor.rootView.height
+        val availableHeight = outsideAnchor - snackbar.view.paddingTop - snackbar.view.paddingBottom
         if (availableHeight > 0 && snackbar.view.measuredHeight > availableHeight && showLongMessage != null) {
             showLongMessage.invoke(message)
             return

@@ -2,6 +2,7 @@ package com.andsi.airlyrics.settings.store
 
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Build
 import com.andsi.airlyrics.core.model.ThemeAccent
 import com.andsi.airlyrics.core.prefs.prefs
 
@@ -10,6 +11,7 @@ object ThemeSettingsStore {
     private const val PREF_NAME = "app_theme"
     private const val KEY_DARK_MODE = "dark_mode"
     private const val KEY_ACCENT = "accent"
+    private const val KEY_COVER_SEED = "cover_seed"
 
     private fun store(context: Context) = prefs(context, PREF_NAME)
 
@@ -34,6 +36,36 @@ object ThemeSettingsStore {
 
     fun setDark(context: Context, enabled: Boolean) {
         store(context).setBoolean(KEY_DARK_MODE, enabled)
+    }
+
+    /** Clears the explicit light/dark choice so the app follows the system again. */
+    fun setFollowSystem(context: Context) {
+        store(context).setString(KEY_DARK_MODE, null)
+    }
+
+    fun isDynamicColorAvailable(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+    fun getCoverSeed(context: Context): Int? {
+        val preferences = store(context)
+        return if (preferences.contains(KEY_COVER_SEED)) preferences.getInt(KEY_COVER_SEED, 0) else null
+    }
+
+    /** Returns true when the stored cover seed changed. */
+    fun setCoverSeed(context: Context, seed: Int): Boolean {
+        if (getCoverSeed(context) == seed) return false
+        store(context).setInt(KEY_COVER_SEED, seed)
+        return true
+    }
+
+    /** Seed color for accents that are derived at runtime (system Monet or album artwork). */
+    fun resolveSeed(context: Context, accent: ThemeAccent = getAccent(context)): Int? {
+        return when (accent) {
+            ThemeAccent.DYNAMIC -> if (isDynamicColorAvailable()) {
+                runCatching { context.getColor(android.R.color.system_accent1_500) }.getOrNull()
+            } else null
+            ThemeAccent.COVER -> getCoverSeed(context)
+            else -> null
+        }
     }
 
     fun getAccent(context: Context): ThemeAccent {

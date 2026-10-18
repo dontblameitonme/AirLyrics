@@ -41,6 +41,8 @@ class MainViewModelStateTest : MainViewModelTestBase() {
 
         assertTrue(viewModel.navigateBack())
         assertEquals(SettingsSubPage.HOME, viewModel.uiState.value.settingsSubPage)
+        assertTrue(viewModel.navigateBack())
+        assertEquals(Page.LYRICS, viewModel.uiState.value.currentPage)
         assertFalse(viewModel.navigateBack())
     }
 

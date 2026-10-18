@@ -28,4 +28,11 @@ internal interface MainChromeHost {
     fun dp(value: Int): Int
     fun isDarkTheme(): Boolean
     fun themeAccent(): ThemeAccent
+
+    /** Seed for runtime tonal accents (Monet / cover); null for presets. */
+    fun themeSeed(): Int? = themeSeedFor(themeAccent())
+    fun themeSeedFor(accent: ThemeAccent): Int? = null
+
+    /** Accents selectable on this device (Monet needs Android 12+). */
+    fun availableThemeAccents(): List<ThemeAccent> = ThemeAccent.entries.filter { it != ThemeAccent.DYNAMIC }
 }

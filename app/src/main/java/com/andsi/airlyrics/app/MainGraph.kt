@@ -96,7 +96,8 @@ internal class MainGraph(
         paletteProvider = {
             AirLyricsTheme.palette(
                 isDark = ThemeSettingsStore.isDark(activity),
-                accent = ThemeSettingsStore.getAccent(activity)
+                accent = ThemeSettingsStore.getAccent(activity),
+                seed = ThemeSettingsStore.resolveSeed(activity)
             )
         }
     )
