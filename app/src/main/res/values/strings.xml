@@ -421,4 +421,9 @@ Word-timed TTML:
     <string name="provider_spicy_name">Spicy Lyrics</string>
     <string name="ui_search_international_title">Search with international title</string>
     <string name="ui_searching_international_title">Trying international-title search…</string>
+    <string name="ui_now_playing_waiting">Play a song in your music app and its lyrics will appear here.</string>
+    <string name="ui_play">Play</string>
+    <string name="ui_pause">Pause</string>
+    <string name="ui_previous_track">Previous track</string>
+    <string name="ui_next_track">Next track</string>
 </resources>

@@ -70,6 +70,8 @@ import com.andsi.airlyrics.ui.model.LyricsSettingsUiState
 import com.andsi.airlyrics.ui.model.MainUiActions
 import com.andsi.airlyrics.ui.model.MainUiHost
 import com.andsi.airlyrics.ui.model.MediaPageState
+import com.andsi.airlyrics.ui.model.NowPlayingListener
+import com.andsi.airlyrics.ui.model.NowPlayingSession
 import com.andsi.airlyrics.ui.model.OptionItem
 import com.andsi.airlyrics.ui.model.RecentLyricsUiState
 import com.andsi.airlyrics.ui.model.SavedLyricsUiState
@@ -175,6 +177,8 @@ internal class MainActivityUiHost(
         )
     }
     override fun getAppName(packageName: String): String = graph.mediaSourceController.getAppName(packageName)
+    override fun openNowPlayingSession(listener: NowPlayingListener): NowPlayingSession =
+        MainNowPlayingSession(this, graph.activity.lifecycleScope, listener, ::getAppName)
     override fun getPlaybackStateText(state: Int?): String = graph.mediaSourceController.getPlaybackStateText(state)
     override fun runOnAppIo(block: () -> Unit) = graph.runOnAppIo(block)
     override fun runOnMainThread(block: () -> Unit) = graph.runOnMainThread(block)

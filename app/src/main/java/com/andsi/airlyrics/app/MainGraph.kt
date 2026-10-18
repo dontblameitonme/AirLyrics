@@ -447,6 +447,7 @@ internal class MainGraph(
                 previous.foreground.floating.clickThrough != latest.foreground.floating.clickThrough
 
         val permissionRebuildRequired = when (latest.currentPage) {
+            Page.LYRICS -> notificationListenerChanged
             Page.MEDIA -> notificationListenerChanged
             Page.FLOATING -> overlayPermissionChanged
             Page.SETTINGS -> latest.settingsSubPage == SettingsSubPage.HOME ||

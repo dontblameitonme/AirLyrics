@@ -422,4 +422,9 @@ TTML de tiempo por palabra:
     <string name="ui_lyrics_expired">La letra ha caducado</string>
     <string name="ui_search_international_title">Buscar con título internacional</string>
     <string name="ui_searching_international_title">Buscando con el título internacional…</string>
+    <string name="ui_now_playing_waiting">Reproduce una canción en tu app de música y su letra aparecerá aquí.</string>
+    <string name="ui_play">Reproducir</string>
+    <string name="ui_pause">Pausar</string>
+    <string name="ui_previous_track">Pista anterior</string>
+    <string name="ui_next_track">Pista siguiente</string>
 </resources>

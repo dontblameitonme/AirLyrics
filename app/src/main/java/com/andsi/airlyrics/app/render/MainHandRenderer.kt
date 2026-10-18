@@ -74,6 +74,7 @@ internal class MainHandRenderer(
         }
 
         val pageView = when (state.currentPage) {
+            Page.LYRICS -> com.andsi.airlyrics.ui.pages.nowplaying.createNowPlayingPage(host)
             Page.MEDIA -> createMediaPage(host, animateContent = animateContent)
             Page.FLOATING -> createFloatingPage(host)
             Page.SETTINGS -> createSettingsPage(host)

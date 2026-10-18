@@ -1,5 +1,7 @@
 package com.andsi.airlyrics.floating
 
+import com.andsi.airlyrics.lyrics.NowPlayingLyricsHub
+
 import com.andsi.airlyrics.core.model.LyricsSearchMode
 import com.andsi.airlyrics.lyrics.LyricsSearchCoordinator
 import com.andsi.airlyrics.core.model.SongIdentity
@@ -107,6 +109,7 @@ internal fun FloatingLyricsService.loadLyricsForSong(
         "${getString(R.string.ui_loading)}\n${media.displayText}"
     }
     markLyricsLoading(media.playbackLyricsKey())
+    NowPlayingLyricsHub.markLoading(media.toSongIdentity())
 
     lyricsLookupRunner.submit(
         requestKey = lookupRequestKey.value,
@@ -154,12 +157,15 @@ internal fun FloatingLyricsService.applyLyricsResult(
         } else {
             markLyricsUnavailable(media.playbackLyricsKey())
         }
+        NowPlayingLyricsHub.publish(media.toSongIdentity(), lyricsResult)
         return
     }
 
     renderer.clear()
-    renderer.show { lookupFailureText(result.exceptionOrNull(), media) }
+    val failureText = lookupFailureText(result.exceptionOrNull(), media)
+    renderer.show { failureText }
     markLyricsUnavailable(media.playbackLyricsKey())
+    NowPlayingLyricsHub.markUnavailable(media.toSongIdentity(), failureText)
 }
 
 internal fun FloatingLyricsService.lookupFailureText(error: Throwable?, media: CurrentMediaInfo): String {
@@ -214,6 +220,10 @@ internal fun FloatingLyricsService.importPlainLyrics(uri: Uri, overwrite: Boolea
     )
 
     if (localPlainLrc != null) {
+        NowPlayingLyricsHub.publish(
+            media.toSongIdentity(),
+            LyricsProviderResult(plainProviderId = "local", plainProviderName = "local", plainLrc = localPlainLrc)
+        )
         renderer.setLyricsAccess(null)
         automaticOnlineLookupSuppressedSong = null
         lastPlaybackLyricsKey = media.playbackLyricsKey()

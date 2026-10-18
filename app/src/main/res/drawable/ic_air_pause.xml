@@ -1,0 +1,10 @@
+<!-- Simple transport glyph for the in-app lyrics page. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <path
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M280,200L360,200Q384,200 384,224L384,736Q384,760 360,760L280,760Q256,760 256,736L256,224Q256,200 280,200ZM600,200L680,200Q704,200 704,224L704,736Q704,760 680,760L600,760Q576,760 576,736L576,224Q576,200 600,200Z"/>
+</vector>

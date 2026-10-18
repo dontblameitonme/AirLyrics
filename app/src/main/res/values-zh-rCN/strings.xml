@@ -420,4 +420,9 @@
     <string name="provider_spicy_name">Spicy Lyrics</string>
     <string name="ui_search_international_title">国际标题搜索</string>
     <string name="ui_searching_international_title">正在尝试国际标题搜索…</string>
+    <string name="ui_now_playing_waiting">在音乐 App 中播放歌曲，歌词会显示在这里。</string>
+    <string name="ui_play">播放</string>
+    <string name="ui_pause">暂停</string>
+    <string name="ui_previous_track">上一首</string>
+    <string name="ui_next_track">下一首</string>
 </resources>

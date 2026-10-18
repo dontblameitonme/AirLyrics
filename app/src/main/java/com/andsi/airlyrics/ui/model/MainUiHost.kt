@@ -21,7 +21,8 @@ internal abstract class MainUiHost(
     MediaUiHost,
     OptionControlsHost,
     FloatingUiHost,
-    SettingsUiHost {
+    SettingsUiHost,
+    NowPlayingUiHost {
     private val currentLoad = com.andsi.airlyrics.ui.async.LatestUiTaskRunner()
     private val recentLoad = com.andsi.airlyrics.ui.async.LatestUiTaskRunner()
     private val savedLoad = com.andsi.airlyrics.ui.async.LatestUiTaskRunner()

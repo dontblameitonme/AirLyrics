@@ -76,6 +76,7 @@ internal fun createBottomTabs(activity: MainUiHost): View  = with(activity) crea
     }
     tabRow = bar
 
+    addTab(activity, bar, Page.LYRICS, R.string.ui_lyrics)
     addTab(activity, bar, Page.MEDIA, R.string.ui_media)
     addTab(activity, bar, Page.FLOATING, R.string.ui_floating)
     addTab(activity, bar, Page.SETTINGS, R.string.ui_settings)
@@ -164,6 +165,7 @@ internal fun updateTabs(activity: MainUiHost, animate: Boolean = true): Unit = w
             quickFloatingTabLabelRes(quickFloatingDesiredVisible, overlayPermissionGranted)
         } else {
             when (page) {
+                Page.LYRICS -> R.string.ui_lyrics
                 Page.MEDIA -> R.string.ui_media
                 Page.FLOATING -> R.string.ui_floating
                 Page.SETTINGS -> R.string.ui_settings
