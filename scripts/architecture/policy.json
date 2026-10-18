@@ -44,6 +44,9 @@
         }
       ]
     },
+    "songinfo": {
+      "allows": []
+    },
     "lyrics": {
       "allows": [
         {
@@ -208,6 +211,10 @@
         {
           "group": "ui",
           "reason": "Implement UI-owned contracts and assemble screens."
+        },
+        {
+          "group": "songinfo",
+          "reason": "Composition root."
         }
       ]
     }

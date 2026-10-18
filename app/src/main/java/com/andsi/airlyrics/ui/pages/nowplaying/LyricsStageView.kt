@@ -88,6 +88,15 @@ internal class LyricsStageView(context: Context) : View(context) {
         invalidate()
     }
 
+    var showTranslation: Boolean = true
+        set(value) {
+            if (field == value) return
+            field = value
+            relayout()
+            if (activeIndex >= 0) scrollY = targetScrollFor(activeIndex)
+            invalidate()
+        }
+
     fun showLines(newLines: List<NowPlayingLineUi>) {
         if (newLines == lines && message == null) return
         lines = newLines
@@ -210,7 +219,7 @@ internal class LyricsStageView(context: Context) : View(context) {
         var top = 0f
         laidOut = lines.map { line ->
             val text = staticLayout(line.text.ifBlank { "♪" }, linePaint, width, Layout.Alignment.ALIGN_NORMAL)
-            val translation = line.translation?.takeIf { it.isNotBlank() }
+            val translation = line.translation?.takeIf { showTranslation && it.isNotBlank() }
                 ?.let { staticLayout(it, translationPaint, width, Layout.Alignment.ALIGN_NORMAL) }
             val height = text.height + (translation?.let { it.height + translationGap } ?: 0f)
             LaidOutLine(line, text, translation, top, height).also {

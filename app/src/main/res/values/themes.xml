@@ -10,4 +10,16 @@
     </style>
 
     <style name="Theme.AirLyrics" parent="Base.Theme.AirLyrics" />
+
+    <!-- Material 3 theme for the in-app lyrics page, its sheets and dialogs. Accent colors are
+         tinted at runtime from the user's palette. -->
+    <style name="Theme.AirLyrics.NowPlaying" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/airlyrics_window_background</item>
+        <item name="android:colorBackground">@color/airlyrics_window_background</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.AirLyrics.NowPlaying.BottomSheet</item>
+    </style>
+
+    <style name="ThemeOverlay.AirLyrics.NowPlaying.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>

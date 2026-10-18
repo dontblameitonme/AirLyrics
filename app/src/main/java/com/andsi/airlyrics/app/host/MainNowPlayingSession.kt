@@ -145,6 +145,10 @@ internal class MainNowPlayingSession(
         seekToPlayback(lineStartMs - offsetMs)
     }
 
+    override fun refreshLyricsOffset() {
+        song?.let { offsetMs = LyricsOffsetStore.getOffsetMs(context, it) }
+    }
+
     override fun close() {
         if (closed) return
         closed = true
@@ -191,6 +195,7 @@ internal class MainNowPlayingSession(
         val track = NowPlayingTrackUi(
             title = media.title,
             artist = media.artist,
+            album = media.album,
             sourceName = appName(media.sourcePackage),
             durationMs = media.durationMs,
             isPlaying = media.isPlaying,

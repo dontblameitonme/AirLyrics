@@ -179,6 +179,24 @@ internal class MainActivityUiHost(
     override fun getAppName(packageName: String): String = graph.mediaSourceController.getAppName(packageName)
     override fun openNowPlayingSession(listener: NowPlayingListener): NowPlayingSession =
         MainNowPlayingSession(this, graph.activity.lifecycleScope, listener, ::getAppName)
+    private val nowPlayingExtras by lazy { MainNowPlayingExtras(this, graph.activity.lifecycleScope) }
+    override fun loadSongComments(
+        track: com.andsi.airlyrics.ui.model.NowPlayingTrackUi,
+        sort: com.andsi.airlyrics.ui.model.SongCommentSortUi,
+        offset: Int,
+        deliver: (Result<com.andsi.airlyrics.ui.model.SongCommentsPageUi>) -> Unit
+    ): com.andsi.airlyrics.ui.model.UiRequestHandle = nowPlayingExtras.loadComments(track, sort, offset, deliver)
+    override fun aiIntroSettings(): com.andsi.airlyrics.ui.model.AiIntroSettingsUi = nowPlayingExtras.aiSettings()
+    override fun saveAiIntroSettings(settings: com.andsi.airlyrics.ui.model.AiIntroSettingsUi) =
+        nowPlayingExtras.saveAiSettings(settings)
+    override fun streamAiSongIntro(
+        track: com.andsi.airlyrics.ui.model.NowPlayingTrackUi,
+        lyricsText: String,
+        onDelta: (String) -> Unit,
+        onFinished: (Throwable?) -> Unit
+    ): com.andsi.airlyrics.ui.model.UiRequestHandle = nowPlayingExtras.streamIntro(track, lyricsText, onDelta, onFinished)
+    override fun nowPlayingTranslationVisible(): Boolean = nowPlayingExtras.translationVisible()
+    override fun setNowPlayingTranslationVisible(visible: Boolean) = nowPlayingExtras.setTranslationVisible(visible)
     override fun getPlaybackStateText(state: Int?): String = graph.mediaSourceController.getPlaybackStateText(state)
     override fun runOnAppIo(block: () -> Unit) = graph.runOnAppIo(block)
     override fun runOnMainThread(block: () -> Unit) = graph.runOnMainThread(block)
