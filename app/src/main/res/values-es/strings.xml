@@ -438,7 +438,6 @@ TTML de tiempo por palabra:
     <string name="ui_comments_failed">No se pudieron cargar los comentarios: %1$s</string>
     <string name="ui_retry">Reintentar</string>
     <string name="ui_ai_intro">Info con IA</string>
-    <string name="ui_ai_intro_title">Presentación de la canción con IA</string>
     <string name="ui_ai_base_url">URL base de la API</string>
     <string name="ui_ai_base_url_helper">Cualquier endpoint compatible con OpenAI, p. ej. https://api.openai.com/v1</string>
     <string name="ui_ai_base_url_invalid">Introduce una URL que empiece por https://</string>
@@ -491,7 +490,6 @@ TTML de tiempo por palabra:
     <string name="ui_ai_step_found">%1$s: %2$d resultados</string>
     <string name="ui_ai_step_search_failed">Error de búsqueda: %1$s</string>
     <string name="ui_ai_step_generating">Generando…</string>
-    <string name="ui_ai_step_done">Listo</string>
     <string name="ui_ai_search_no_results">sin resultados (el buscador puede bloquear solicitudes automáticas)</string>
     <string name="ui_ai_search_query_suffix">canción</string>
     <string name="ui_ai_search_header">A continuación, resultados de búsqueda web. Son solo una referencia y pueden no tener relación con esta canción o ser inexactos; compruébalos antes de usarlos. Cita las fuentes como [número]:</string>
@@ -531,4 +529,16 @@ TTML de tiempo por palabra:
     <string name="ui_ai_preset_trivia">Enumera en español entre 5 y 8 curiosidades o anécdotas sobre \"{title}\" de {artist}, una o dos frases cada una, en forma de lista. Incluye solo lo que sepas con seguridad y señala lo dudoso.</string>
     <string name="ui_ai_preset_similar">Según el estilo, el tono y los temas de \"{title}\" de {artist}, recomienda en español 8 canciones parecidas, a ser posible de artistas distintos, cada una con una frase que lo justifique, con el formato \"Título - Artista: motivo\".</string>
     <string name="ui_ai_preset_translate">Traduce al español la letra de \"{title}\" de {artist} verso a verso, manteniendo el mismo número de líneas y un lenguaje natural. Si la letra ya está en español, explica en su lugar las expresiones coloquiales, referencias o frases difíciles.\n\nLetra:\n{lyrics}</string>
+    <string name="ui_ai_chat_title">Preguntas a la IA</string>
+    <string name="ui_ai_chat_greeting">¡Hola! ¿Qué quieres saber sobre «%1$s»? Toca una pregunta rápida o escribe la tuya.</string>
+    <string name="ui_ai_chat_hint">Pregunta sobre esta canción…</string>
+    <string name="ui_ai_chat_send">Enviar</string>
+    <string name="ui_ai_chat_stop">Detener</string>
+    <string name="ui_ai_copy">Copiar</string>
+    <string name="ui_ai_copied">Copiado</string>
+    <string name="ui_ai_clear_chat">Borrar chat</string>
+    <string name="ui_ai_web_on">Web · %1$s</string>
+    <string name="ui_ai_web_off">Web: no</string>
+    <string name="ui_ai_step_stopped">Detenido</string>
+    <string name="ui_ai_chat_system">Eres un asistente musical amable y experto dentro de una app de letras. El usuario está escuchando «%1$s» de %2$s (álbum: %3$s). Responde preguntas sobre esta canción, usando por defecto el idioma de la pregunta. Usa párrafos cortos, pequeños títulos Markdown o listas cuando ayude. Indica claramente si no estás seguro de un dato; no inventes nada.\n\nLetra:\n%4$s</string>
 </resources>

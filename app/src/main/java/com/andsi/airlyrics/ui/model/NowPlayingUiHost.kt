@@ -98,6 +98,9 @@ internal data class AiIntroSettingsUi(
     val customHeaderValue: String
 )
 
+/** A finished turn sent as context; user turns carry the template that was asked. */
+internal data class AiChatTurnUi(val fromUser: Boolean, val text: String)
+
 internal data class AiSourceUi(
     val title: String,
     val url: String,
@@ -137,11 +140,16 @@ internal interface NowPlayingUiHost {
     fun setAiWebSearchOn(on: Boolean)
     fun setDefaultSearchEngine(engine: SearchEngineUi)
 
-    /** Optionally searches the web, then streams the reply; callbacks run on the main thread. */
-    fun streamAiSongIntro(
+    /**
+     * Continues the per-song AI conversation: optionally searches the web for [question] (a prompt
+     * template or free text; placeholders are filled in), then streams the reply. Callbacks run
+     * on the main thread.
+     */
+    fun streamAiChat(
         track: NowPlayingTrackUi,
         lyricsText: String,
-        prompt: AiPromptUi,
+        history: List<AiChatTurnUi>,
+        question: String,
         webSearch: Boolean,
         onProgress: (AiIntroProgressUi) -> Unit,
         onDelta: (String) -> Unit,

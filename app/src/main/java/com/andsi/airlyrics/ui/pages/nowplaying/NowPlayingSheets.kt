@@ -46,7 +46,8 @@ internal class SheetScaffold(
     val header: LinearLayout,
     val subtitle: TextView,
     val content: LinearLayout,
-    val scroll: NestedScrollView
+    val scroll: NestedScrollView,
+    val root: LinearLayout
 )
 
 /**
@@ -59,7 +60,9 @@ internal fun createSheet(
     ui: Context,
     title: String,
     subtitle: String? = null,
-    expanded: Boolean = false
+    expanded: Boolean = false,
+    /** Fixed sheet height as a fraction of the screen; the body scrolls and extra views can be docked below it. */
+    heightFraction: Float? = null
 ): SheetScaffold {
     val scheme = host.nowPlayingScheme()
     val dialog = BottomSheetDialog(ui)
@@ -116,8 +119,14 @@ internal fun createSheet(
         isFillViewport = true
         addView(content)
     }
-    root.addView(scroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
-    dialog.setContentView(root)
+    if (heightFraction != null) {
+        root.addView(scroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+        val height = (host.resources.displayMetrics.heightPixels * heightFraction).toInt()
+        dialog.setContentView(root, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height))
+    } else {
+        root.addView(scroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        dialog.setContentView(root)
+    }
     val clearContainer = {
         dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.setBackgroundColor(Color.TRANSPARENT)
     }
@@ -133,7 +142,7 @@ internal fun createSheet(
             state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
-    return SheetScaffold(dialog, scheme, header, subtitleView, content, scroll)
+    return SheetScaffold(dialog, scheme, header, subtitleView, content, scroll, root)
 }
 
 internal fun dismissWithActivity(host: MainUiHost, dialog: Dialog, onDismiss: () -> Unit = {}) {

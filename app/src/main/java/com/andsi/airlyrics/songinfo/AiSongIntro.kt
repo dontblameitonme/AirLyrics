@@ -21,6 +21,9 @@ internal data class AiSongIntroRequest(
     val search: String? = null
 )
 
+/** One chat turn; [role] is "system", "user" or "assistant". */
+internal data class AiChatMessage(val role: String, val content: String)
+
 internal class AiSongIntroException(message: String) : IOException(message)
 
 /**
@@ -34,6 +37,14 @@ internal object AiSongIntroClient {
     fun stream(
         config: AiSongIntroConfig,
         request: AiSongIntroRequest,
+        cancelled: AtomicBoolean,
+        onDelta: (String) -> Unit
+    ) = streamChat(config, listOf(AiChatMessage("user", renderPrompt(config.promptTemplate, request))), cancelled, onDelta)
+
+    /** Streams a multi-turn conversation; [AiSongIntroConfig.promptTemplate] is ignored. */
+    fun streamChat(
+        config: AiSongIntroConfig,
+        messages: List<AiChatMessage>,
         cancelled: AtomicBoolean,
         onDelta: (String) -> Unit
     ) {
@@ -50,7 +61,7 @@ internal object AiSongIntroClient {
         try {
             connection.requestMethod = "POST"
             connection.doOutput = true
-            val body = buildBody(config, request)
+            val body = buildChatBody(config.model, messages)
             connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
             val code = connection.responseCode
             if (code !in 200..299) {
@@ -85,6 +96,18 @@ internal object AiSongIntroClient {
         val trimmed = baseUrl.trim().trimEnd('/')
         return if (trimmed.endsWith("/chat/completions")) trimmed else "$trimmed/chat/completions"
     }
+
+    internal fun buildChatBody(model: String, messages: List<AiChatMessage>): String =
+        JSONObject()
+            .put("model", model.trim())
+            .put("stream", true)
+            .put(
+                "messages",
+                JSONArray().apply {
+                    messages.forEach { put(JSONObject().put("role", it.role).put("content", it.content)) }
+                }
+            )
+            .toString()
 
     internal fun buildBody(config: AiSongIntroConfig, request: AiSongIntroRequest): String =
         JSONObject()

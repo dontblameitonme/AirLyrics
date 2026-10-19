@@ -436,7 +436,6 @@
     <string name="ui_comments_failed">評論載入失敗：%1$s</string>
     <string name="ui_retry">重試</string>
     <string name="ui_ai_intro">AI 介紹</string>
-    <string name="ui_ai_intro_title">AI 歌曲介紹</string>
     <string name="ui_ai_base_url">API 位址</string>
     <string name="ui_ai_base_url_helper">相容 OpenAI 的介面，例如 https://api.openai.com/v1</string>
     <string name="ui_ai_base_url_invalid">請輸入以 https:// 開頭的位址</string>
@@ -489,7 +488,6 @@
     <string name="ui_ai_step_found">%1$s 找到 %2$d 筆結果</string>
     <string name="ui_ai_step_search_failed">搜尋失敗：%1$s</string>
     <string name="ui_ai_step_generating">正在生成…</string>
-    <string name="ui_ai_step_done">已完成</string>
     <string name="ui_ai_search_no_results">沒有結果（搜尋引擎可能攔截了自動請求）</string>
     <string name="ui_ai_search_query_suffix">歌曲</string>
     <string name="ui_ai_search_header">以下是網路搜尋結果，僅供參考，其中可能有與這首歌無關或不準確的內容，請甄別後使用。引用時請用 [編號] 標註來源：</string>
@@ -529,4 +527,16 @@
     <string name="ui_ai_preset_trivia">請用中文列出關於{artist}的歌曲《{title}》的 5～8 條冷知識或幕後花絮，每條一兩句話，用列表呈現。只寫有把握的內容，不確定的請註明。</string>
     <string name="ui_ai_preset_similar">請根據{artist}的《{title}》的風格、情緒和歌詞主題，用中文推薦 8 首相似的歌曲（盡量來自不同歌手），每首附一句推薦理由，格式為「歌名 - 歌手：理由」。</string>
     <string name="ui_ai_preset_translate">請把{artist}的《{title}》的歌詞逐行翻譯成中文，保持行數對應，譯文自然、貼合語境；如果歌詞本身就是中文，請改為解釋其中的方言、典故或難懂的表達。\n\n歌詞：\n{lyrics}</string>
+    <string name="ui_ai_chat_title">AI 問答</string>
+    <string name="ui_ai_chat_greeting">你好呀，關於《%1$s》你想了解什麼？可以點下面的快捷問題，或者直接輸入～</string>
+    <string name="ui_ai_chat_hint">問點關於這首歌的…</string>
+    <string name="ui_ai_chat_send">傳送</string>
+    <string name="ui_ai_chat_stop">停止</string>
+    <string name="ui_ai_copy">複製</string>
+    <string name="ui_ai_copied">已複製</string>
+    <string name="ui_ai_clear_chat">清除對話</string>
+    <string name="ui_ai_web_on">聯網 · %1$s</string>
+    <string name="ui_ai_web_off">聯網：關</string>
+    <string name="ui_ai_step_stopped">已停止</string>
+    <string name="ui_ai_chat_system">你是歌詞應用程式裡的音樂助手，友善且專業。使用者正在聽《%1$s》（歌手：%2$s，專輯：%3$s）。請圍繞這首歌回答問題，預設使用使用者提問的語言。需要時使用短段落、Markdown 小標題或清單。不確定的事實請明確說明，不要編造。\n\n歌詞：\n%4$s</string>
 </resources>

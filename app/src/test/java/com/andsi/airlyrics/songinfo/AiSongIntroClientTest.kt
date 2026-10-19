@@ -64,6 +64,27 @@ class AiSongIntroClientTest {
     }
 
     @Test
+    fun buildsChatBodyKeepingRoleOrder() {
+        val body = JSONObject(
+            AiSongIntroClient.buildChatBody(
+                " m ",
+                listOf(
+                    AiChatMessage("system", "s"),
+                    AiChatMessage("user", "q1"),
+                    AiChatMessage("assistant", "a1"),
+                    AiChatMessage("user", "q2"),
+                ),
+            ),
+        )
+        assertEquals("m", body.getString("model"))
+        assertTrue(body.getBoolean("stream"))
+        val messages = body.getJSONArray("messages")
+        assertEquals(4, messages.length())
+        assertEquals(listOf("system", "user", "assistant", "user"), (0 until 4).map { messages.getJSONObject(it).getString("role") })
+        assertEquals("q2", messages.getJSONObject(3).getString("content"))
+    }
+
+    @Test
     fun parsesSseDeltas() {
         assertEquals("你好", AiSongIntroClient.parseSseLine("""data: {"choices":[{"delta":{"content":"你好"}}]}"""))
         assertNull(AiSongIntroClient.parseSseLine("""data: {"choices":[{"delta":{"role":"assistant"}}]}"""))

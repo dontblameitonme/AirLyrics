@@ -437,7 +437,6 @@ Word-timed TTML:
     <string name="ui_comments_failed">Couldn\'t load comments: %1$s</string>
     <string name="ui_retry">Retry</string>
     <string name="ui_ai_intro">AI intro</string>
-    <string name="ui_ai_intro_title">AI song intro</string>
     <string name="ui_ai_base_url">API base URL</string>
     <string name="ui_ai_base_url_helper">Any OpenAI-compatible endpoint, e.g. https://api.openai.com/v1</string>
     <string name="ui_ai_base_url_invalid">Enter a URL starting with https://</string>
@@ -490,7 +489,6 @@ Word-timed TTML:
     <string name="ui_ai_step_found">%1$s: %2$d results</string>
     <string name="ui_ai_step_search_failed">Search failed: %1$s</string>
     <string name="ui_ai_step_generating">Generating…</string>
-    <string name="ui_ai_step_done">Done</string>
     <string name="ui_ai_search_no_results">no results (the engine may be blocking automated requests)</string>
     <string name="ui_ai_search_query_suffix">song</string>
     <string name="ui_ai_search_header">Web search results follow. They are for reference only and may be unrelated to this song or inaccurate, so check them before use. Cite sources as [number]:</string>
@@ -530,4 +528,16 @@ Word-timed TTML:
     <string name="ui_ai_preset_trivia">List 5 to 8 pieces of trivia or behind-the-scenes facts about \"{title}\" by {artist} in English, one or two sentences each, as a bullet list. Only include things you are confident about and flag anything uncertain.</string>
     <string name="ui_ai_preset_similar">Based on the style, mood and lyrical themes of \"{title}\" by {artist}, recommend 8 similar songs in English, preferably by different artists, each with a one-sentence reason, formatted as \"Title - Artist: reason\".</string>
     <string name="ui_ai_preset_translate">Translate the lyrics of \"{title}\" by {artist} into English line by line, keeping the line count aligned and the wording natural. If the lyrics are already in English, explain any slang, references or hard-to-understand phrases instead.\n\nLyrics:\n{lyrics}</string>
+    <string name="ui_ai_chat_title">AI Q&amp;A</string>
+    <string name="ui_ai_chat_greeting">Hi! What would you like to know about “%1$s”? Tap a quick question below or type your own.</string>
+    <string name="ui_ai_chat_hint">Ask about this song…</string>
+    <string name="ui_ai_chat_send">Send</string>
+    <string name="ui_ai_chat_stop">Stop</string>
+    <string name="ui_ai_copy">Copy</string>
+    <string name="ui_ai_copied">Copied</string>
+    <string name="ui_ai_clear_chat">Clear chat</string>
+    <string name="ui_ai_web_on">Web · %1$s</string>
+    <string name="ui_ai_web_off">Web: off</string>
+    <string name="ui_ai_step_stopped">Stopped</string>
+    <string name="ui_ai_chat_system">You are a friendly, knowledgeable music assistant inside a lyrics app. The user is listening to “%1$s” by %2$s (album: %3$s). Answer questions about this song, using the language of the user\'s question by default. Use short paragraphs, small Markdown headings or lists when helpful. Say clearly when you are unsure of a fact; never make things up.\n\nLyrics:\n%4$s</string>
 </resources>

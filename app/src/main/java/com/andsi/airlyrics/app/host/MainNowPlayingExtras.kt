@@ -11,6 +11,7 @@ import com.andsi.airlyrics.settings.store.AiIntroSettings
 import com.andsi.airlyrics.settings.store.AiPromptSetting
 import com.andsi.airlyrics.settings.store.NowPlayingSettingsStore
 import com.andsi.airlyrics.settings.store.WebSearchSettings
+import com.andsi.airlyrics.songinfo.AiChatMessage
 import com.andsi.airlyrics.songinfo.AiSongIntroClient
 import com.andsi.airlyrics.songinfo.AiSongIntroConfig
 import com.andsi.airlyrics.songinfo.AiSongIntroRequest
@@ -21,6 +22,7 @@ import com.andsi.airlyrics.songinfo.NeteaseSong
 import com.andsi.airlyrics.songinfo.WebSearchClient
 import com.andsi.airlyrics.songinfo.WebSearchConfig
 import com.andsi.airlyrics.songinfo.WebSearchEngine
+import com.andsi.airlyrics.ui.model.AiChatTurnUi
 import com.andsi.airlyrics.ui.model.AiIntroProgressUi
 import com.andsi.airlyrics.ui.model.AiIntroSettingsUi
 import com.andsi.airlyrics.ui.model.AiPromptUi
@@ -144,10 +146,11 @@ internal class MainNowPlayingExtras(
         )
     }
 
-    fun streamIntro(
+    fun streamChat(
         track: NowPlayingTrackUi,
         lyricsText: String,
-        prompt: AiPromptUi,
+        history: List<AiChatTurnUi>,
+        question: String,
         webSearch: Boolean,
         onProgress: (AiIntroProgressUi) -> Unit,
         onDelta: (String) -> Unit,
@@ -182,9 +185,21 @@ internal class MainNowPlayingExtras(
                     }
                     if (cancelled.get()) return@runCatching
                     post { onProgress(AiIntroProgressUi.Generating) }
-                    AiSongIntroClient.stream(
-                        AiSongIntroConfig(settings.baseUrl, settings.model, settings.apiKey, prompt.template),
-                        AiSongIntroRequest(track.title, track.artist, track.album, lyricsText, searchBlock),
+                    val request = AiSongIntroRequest(track.title, track.artist, track.album, lyricsText)
+                    val lyrics = lyricsText.trim().let { if (it.length > MAX_CONTEXT_LYRICS) it.take(MAX_CONTEXT_LYRICS) + "\u2026" else it }
+                    val messages = buildList {
+                        add(AiChatMessage("system", context.getString(R.string.ui_ai_chat_system, track.title, track.artist, track.album, lyrics)))
+                        history.forEach { turn ->
+                            add(
+                                if (turn.fromUser) AiChatMessage("user", AiSongIntroClient.renderPrompt(turn.text, request))
+                                else AiChatMessage("assistant", turn.text)
+                            )
+                        }
+                        add(AiChatMessage("user", AiSongIntroClient.renderPrompt(question, request.copy(search = searchBlock))))
+                    }
+                    AiSongIntroClient.streamChat(
+                        AiSongIntroConfig(settings.baseUrl, settings.model, settings.apiKey, ""),
+                        messages,
                         cancelled
                     ) { delta -> post { onDelta(delta) } }
                 }.exceptionOrNull()
@@ -280,6 +295,7 @@ internal class MainNowPlayingExtras(
     private companion object {
         const val PAGE_SIZE = 20
         val songCache = ConcurrentHashMap<String, NeteaseSong>()
+        const val MAX_CONTEXT_LYRICS = 3_000
         val firstHotPageCache = ConcurrentHashMap<String, SongCommentsPageUi>()
         val PRESETS = listOf(
             Triple("preset_intro", R.string.ui_ai_preset_intro_name, R.string.ui_ai_preset_intro),

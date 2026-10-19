@@ -200,16 +200,17 @@ internal class MainActivityUiHost(
     override fun setAiWebSearchOn(on: Boolean) = nowPlayingExtras.setWebSearchOn(on)
     override fun setDefaultSearchEngine(engine: com.andsi.airlyrics.ui.model.SearchEngineUi) =
         nowPlayingExtras.setDefaultSearchEngine(engine)
-    override fun streamAiSongIntro(
+    override fun streamAiChat(
         track: com.andsi.airlyrics.ui.model.NowPlayingTrackUi,
         lyricsText: String,
-        prompt: com.andsi.airlyrics.ui.model.AiPromptUi,
+        history: List<com.andsi.airlyrics.ui.model.AiChatTurnUi>,
+        question: String,
         webSearch: Boolean,
         onProgress: (com.andsi.airlyrics.ui.model.AiIntroProgressUi) -> Unit,
         onDelta: (String) -> Unit,
         onFinished: (Throwable?) -> Unit
     ): com.andsi.airlyrics.ui.model.UiRequestHandle =
-        nowPlayingExtras.streamIntro(track, lyricsText, prompt, webSearch, onProgress, onDelta, onFinished)
+        nowPlayingExtras.streamChat(track, lyricsText, history, question, webSearch, onProgress, onDelta, onFinished)
     override fun nowPlayingTranslationVisible(): Boolean = nowPlayingExtras.translationVisible()
     override fun setNowPlayingTranslationVisible(visible: Boolean) = nowPlayingExtras.setTranslationVisible(visible)
     override fun onNowPlayingArtwork(artwork: android.graphics.Bitmap?) {
