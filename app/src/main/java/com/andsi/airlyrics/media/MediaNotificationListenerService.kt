@@ -2,6 +2,7 @@ package com.andsi.airlyrics.media
 
 import android.content.Context
 import android.content.ComponentName
+import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
@@ -14,6 +15,7 @@ import com.andsi.airlyrics.i18n.LocalizedServiceContext
 class MediaNotificationListenerService : NotificationListenerService() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var mediaSessionObserver: MediaSessionObserver
+    private var isExplicitlyStopping = false
 
     private val rescanRunnable = Runnable {
         mediaSessionObserver.refresh()
@@ -25,6 +27,7 @@ class MediaNotificationListenerService : NotificationListenerService() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         mediaSessionObserver = MediaSessionObserver(
             context = this,
             handler = handler,
@@ -49,6 +52,7 @@ class MediaNotificationListenerService : NotificationListenerService() {
     }
 
     override fun onListenerConnected() {
+        isExplicitlyStopping = false
         super.onListenerConnected()
         if (BuildConfig.DEBUG) Log.d(TAG, "Notification listener connected")
         mediaSessionObserver.start()
@@ -57,10 +61,29 @@ class MediaNotificationListenerService : NotificationListenerService() {
     override fun onListenerDisconnected() {
         cleanupMediaSessions()
         super.onListenerDisconnected()
-        requestNotificationListenerRebind()
+        if (!isExplicitlyStopping) {
+            requestNotificationListenerRebind()
+        }
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        performStop()
+    }
+
+    fun performStop() {
+        isExplicitlyStopping = true
+        cleanupMediaSessions()
+        runCatching {
+            requestUnbind()
+        }
+        stopSelf()
     }
 
     override fun onDestroy() {
+        if (instance === this) {
+            instance = null
+        }
         cleanupMediaSessions()
         super.onDestroy()
     }
@@ -127,5 +150,12 @@ class MediaNotificationListenerService : NotificationListenerService() {
     companion object {
         private const val TAG = "MediaNotificationListenerService"
         private const val MEDIA_SESSION_RESCAN_DELAY_MS = 200L
+
+        @Volatile
+        private var instance: MediaNotificationListenerService? = null
+
+        fun requestStop() {
+            instance?.performStop()
+        }
     }
 }

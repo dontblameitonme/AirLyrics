@@ -99,6 +99,26 @@ class FloatingLyricsServiceCommandLifecycleTest {
     }
 
     @Test
+    fun service_onTaskRemoved_hidesWindow() {
+        val controller = Robolectric.buildService(FloatingLyricsService::class.java)
+            .create()
+            .also { serviceController = it }
+        val service = controller.get()
+        val windowManager = shadowWindowManager(service)
+        send(service, FloatingServiceCommand.Show, startId = 1)
+        val firstView = requireNotNull(service.lyricsView)
+        assertTrue(service.windowController.isVisible)
+        assertTrue(windowManager.views.any { it === firstView })
+
+        service.onTaskRemoved(android.content.Intent())
+
+        assertFalse(service.windowController.isVisible)
+        assertNull(service.lyricsView)
+        assertFalse(windowManager.views.any { it === firstView })
+    }
+
+
+    @Test
     fun serviceCommands_lockAndClickThrough_updateWindowFlagsAndState() {
         val controller = Robolectric.buildService(FloatingLyricsService::class.java)
             .create()

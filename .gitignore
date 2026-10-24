@@ -25,3 +25,7 @@ app/src/main/jniLibs/**/*.so
 # Signing keys
 *.jks
 *.keystore
+
+# Python
+__pycache__/
+*.pyc

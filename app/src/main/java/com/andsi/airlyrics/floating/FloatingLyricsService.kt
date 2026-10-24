@@ -26,6 +26,7 @@ import com.andsi.airlyrics.lyrics.LyricsLookupCancellationToken
 import com.andsi.airlyrics.lyrics.LyricsLookupRunner
 import com.andsi.airlyrics.lyrics.LyricsProviderResult
 import com.andsi.airlyrics.lyrics.LyricsRepository
+import com.andsi.airlyrics.media.MediaNotificationListenerService
 import com.andsi.airlyrics.media.CurrentMediaBroadcast
 import com.andsi.airlyrics.media.MediaSourceStore
 import com.andsi.airlyrics.media.model.CurrentMediaInfo
@@ -227,6 +228,17 @@ open class FloatingLyricsService : Service() {
 
         return START_STICKY
     }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        if (isWindowControllerReady()) {
+            windowController.hide(notifyVisibilityChanged = false)
+        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        MediaNotificationListenerService.requestStop()
+        stopSelf()
+    }
+
 
     private fun registerMediaReceiver() {
         ContextCompat.registerReceiver(
