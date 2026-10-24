@@ -1,0 +1,77 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build APK and Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager "ndk;26.3.11579264"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.3.11579264" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/26.3.11579264" >> "$GITHUB_ENV"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: aarch64-linux-android
+
+      - name: Install cargo-ndk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Prepare Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK with Rust core
+        run: ./gradlew :app:assembleDebug --stacktrace
+
+      - name: Prepare Release Asset
+        run: |
+          mkdir -p release-assets
+          cp app/build/outputs/apk/debug/*.apk release-assets/AirLyrics-${{ github.ref_name || 'v1.2.7-patch' }}-arm64-v8a.apk
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [ -z "$TAG_NAME" ] || [ "${{ github.ref_type }}" != "tag" ]; then
+            TAG_NAME="v1.2.7-patch"
+          fi
+          gh release create "$TAG_NAME" release-assets/*.apk \
+            --title "AirLyrics $TAG_NAME" \
+            --notes "### AirLyrics 自定义构建版本
+
+- 同步上游 AirLyrics/AirLyrics:main 最新更新（LDDC 逐字 LRC 导入、已保存歌词批量管理）
+- 新增特性：多任务界面划掉卡片时自觉停止保活（隐藏桌面悬浮窗、解除通知监听、撤销前台通知并退出）
+- 点开前台或按 Home / 切应用进入后台时正常工作" \
+            --clobber
