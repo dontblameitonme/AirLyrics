@@ -54,6 +54,12 @@ jobs:
       - name: Build debug APK with Rust core
         run: ./gradlew :app:assembleDebug --stacktrace
 
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AirLyrics-arm64-v8a
+          path: app/build/outputs/apk/debug/*.apk
+
       - name: Prepare Release Asset and Notes
         run: |
           mkdir -p release-assets
@@ -77,5 +83,4 @@ jobs:
           fi
           gh release create "$TAG_NAME" release-assets/*.apk \
             --title "AirLyrics $TAG_NAME" \
-            --notes-file release_notes.md \
-            --clobber
+            --notes-file release_notes.md
