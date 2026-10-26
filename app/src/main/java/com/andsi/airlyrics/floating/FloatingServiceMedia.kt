@@ -1,11 +1,9 @@
 package com.andsi.airlyrics.floating
 
-import android.content.ComponentName
-import android.service.notification.NotificationListenerService
 import com.andsi.airlyrics.R
 import com.andsi.airlyrics.core.model.SongIdentity
 import com.andsi.airlyrics.media.CurrentMediaReader
-import com.andsi.airlyrics.media.MediaNotificationListenerService
+import com.andsi.airlyrics.media.NotificationListenerDemand
 import com.andsi.airlyrics.media.MediaSourceStore
 import com.andsi.airlyrics.media.model.CurrentMediaInfo
 import com.andsi.airlyrics.media.toSongIdentity
@@ -141,14 +139,7 @@ internal fun FloatingLyricsService.readSelectedCurrentMediaInfo(): CurrentMediaI
 }
 
 internal fun FloatingLyricsService.requestNotificationListenerRebind() {
-    val component = ComponentName(
-        this,
-        MediaNotificationListenerService::class.java
-    )
-
-    runCatching {
-        NotificationListenerService.requestRebind(component)
-    }
+    NotificationListenerDemand.requestRebindIfNeeded(this)
 }
 
 internal fun FloatingLyricsService.handleMediaSourceLost(sourcePackage: String) {

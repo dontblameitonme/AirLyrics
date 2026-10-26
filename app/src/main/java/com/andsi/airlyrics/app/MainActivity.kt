@@ -1,13 +1,10 @@
 package com.andsi.airlyrics.app
 
-import android.content.ComponentName
 import android.os.Bundle
-import android.service.notification.NotificationListenerService
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.andsi.airlyrics.app.platform.PermissionHelper
 import com.andsi.airlyrics.app.viewmodel.MainViewModel
-import com.andsi.airlyrics.media.MediaNotificationListenerService
+import com.andsi.airlyrics.media.NotificationListenerDemand
 
 class MainActivity : AppCompatActivity() {
     internal val mainViewModel: MainViewModel by viewModels {
@@ -29,12 +26,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        rebindNotificationListenerIfNeeded()
         graph.onStart()
     }
 
     override fun onResume() {
         super.onResume()
+        // Covers returning from the system notification-access screen after granting access.
+        NotificationListenerDemand.requestRebindIfNeeded(this)
         graph.onResume()
     }
 
@@ -52,12 +50,4 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun rebindNotificationListenerIfNeeded() {
-        if (PermissionHelper.hasNotificationListenerAccess(this)) {
-            val component = ComponentName(this, MediaNotificationListenerService::class.java)
-            runCatching {
-                NotificationListenerService.requestRebind(component)
-            }
-        }
-    }
 }

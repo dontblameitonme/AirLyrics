@@ -2,7 +2,6 @@ package com.andsi.airlyrics.media
 
 import android.content.Context
 import android.content.ComponentName
-import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
@@ -54,35 +53,43 @@ class MediaNotificationListenerService : NotificationListenerService() {
     override fun onListenerConnected() {
         isExplicitlyStopping = false
         super.onListenerConnected()
+        connected = true
         if (BuildConfig.DEBUG) Log.d(TAG, "Notification listener connected")
+        if (!NotificationListenerDemand.isNeeded()) {
+            // Bound by the system without an in-app consumer (boot, process restart,
+            // force-stop recovery). Release the binding so the process is not pinned.
+            if (BuildConfig.DEBUG) Log.d(TAG, "No listener demand, unbinding")
+            performStop()
+            return
+        }
         mediaSessionObserver.start()
     }
 
     override fun onListenerDisconnected() {
+        connected = false
         cleanupMediaSessions()
         super.onListenerDisconnected()
-        if (!isExplicitlyStopping) {
+        if (!isExplicitlyStopping && NotificationListenerDemand.isNeeded()) {
             requestNotificationListenerRebind()
         }
     }
 
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        super.onTaskRemoved(rootIntent)
-        performStop()
-    }
+    // No onTaskRemoved override: this service is only bound by system_server and never
+    // started, so the framework does not deliver onTaskRemoved to it.
 
     fun performStop() {
         isExplicitlyStopping = true
+        connected = false
         cleanupMediaSessions()
         runCatching {
             requestUnbind()
         }
-        stopSelf()
     }
 
     override fun onDestroy() {
         if (instance === this) {
             instance = null
+            connected = false
         }
         cleanupMediaSessions()
         super.onDestroy()
@@ -153,6 +160,11 @@ class MediaNotificationListenerService : NotificationListenerService() {
 
         @Volatile
         private var instance: MediaNotificationListenerService? = null
+
+        @Volatile
+        private var connected = false
+
+        fun isConnected(): Boolean = instance != null && connected
 
         fun requestStop() {
             instance?.performStop()
