@@ -5,7 +5,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
-import com.andsi.airlyrics.app.platform.PermissionHelper
+import androidx.core.app.NotificationManagerCompat
 
 /**
  * Tracks which in-process consumers currently need the notification listener binding.
@@ -29,7 +29,7 @@ internal object NotificationListenerDemand {
     internal var rebindAction: (Context) -> Unit = ::requestSystemRebind
     internal var releaseAction: () -> Unit = { MediaNotificationListenerService.requestStop() }
     internal var isConnected: () -> Boolean = { MediaNotificationListenerService.isConnected() }
-    internal var hasAccess: (Context) -> Boolean = PermissionHelper::hasNotificationListenerAccess
+    internal var hasAccess: (Context) -> Boolean = ::hasListenerAccess
 
     private val releaseRunnable = Runnable {
         if (reasons.isEmpty()) releaseAction()
@@ -62,6 +62,11 @@ internal object NotificationListenerDemand {
         rebindAction(appContext)
     }
 
+    private fun hasListenerAccess(context: Context): Boolean {
+        return NotificationManagerCompat.getEnabledListenerPackages(context)
+            .contains(context.packageName)
+    }
+
     private fun requestSystemRebind(context: Context) {
         runCatching {
             NotificationListenerService.requestRebind(
@@ -76,6 +81,6 @@ internal object NotificationListenerDemand {
         rebindAction = ::requestSystemRebind
         releaseAction = { MediaNotificationListenerService.requestStop() }
         isConnected = { MediaNotificationListenerService.isConnected() }
-        hasAccess = PermissionHelper::hasNotificationListenerAccess
+        hasAccess = ::hasListenerAccess
     }
 }
