@@ -26,7 +26,7 @@ import com.andsi.airlyrics.lyrics.LyricsLookupCancellationToken
 import com.andsi.airlyrics.lyrics.LyricsLookupRunner
 import com.andsi.airlyrics.lyrics.LyricsProviderResult
 import com.andsi.airlyrics.lyrics.LyricsRepository
-import com.andsi.airlyrics.media.MediaNotificationListenerService
+import com.andsi.airlyrics.media.NotificationListenerDemand
 import com.andsi.airlyrics.media.CurrentMediaBroadcast
 import com.andsi.airlyrics.media.MediaSourceStore
 import com.andsi.airlyrics.media.model.CurrentMediaInfo
@@ -191,6 +191,7 @@ open class FloatingLyricsService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        NotificationListenerDemand.acquire(this, NotificationListenerDemand.Reason.FLOATING_SERVICE)
         localizedContentLanguageTags = resources.configuration.locales.toLanguageTags()
 
         selectedSourcePackage = MediaSourceStore.getSelectedPackage(this)
@@ -235,7 +236,10 @@ open class FloatingLyricsService : Service() {
             windowController.hide(notifyVisibilityChanged = false)
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
-        MediaNotificationListenerService.requestStop()
+        NotificationListenerDemand.release(
+            NotificationListenerDemand.Reason.FLOATING_SERVICE,
+            immediate = true
+        )
         stopSelf()
     }
 
@@ -295,6 +299,7 @@ open class FloatingLyricsService : Service() {
             windowController.hide(notifyVisibilityChanged = false)
         }
         broadcastWindowVisibility(false)
+        NotificationListenerDemand.release(NotificationListenerDemand.Reason.FLOATING_SERVICE)
         super.onDestroy()
     }
 
