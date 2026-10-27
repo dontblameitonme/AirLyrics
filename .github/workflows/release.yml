@@ -66,11 +66,12 @@ jobs:
           TAG_NAME="${GITHUB_REF_NAME:-v1.2.7-patch}"
           cp app/build/outputs/apk/debug/*.apk "release-assets/AirLyrics-${TAG_NAME}-arm64-v8a.apk"
           cat << 'EOF' > release_notes.md
-          ### AirLyrics 自定义构建版本
+          ### AirLyrics v1.2.7.1 自定义构建版本
 
-          - 通知监听改为按需绑定：仅在主界面可见或悬浮歌词运行时保持连接，离开后约 5 秒自动解绑
-          - 多任务划掉卡片后不再残留"通知侦听器"常驻进程；开机或被系统拉起时也会自行解绑
-          - 无需重新授予通知使用权，再次打开应用即自动恢复
+          - 划掉卡片彻底退出：在任务卡片被划掉时立即撤销所有通知监听需求，触发系统解绑并退出进程，黑域不再常驻提示"通知侦听器"
+          - 增加 TaskRemovalWatcherService：即使未启动悬浮窗，在最近任务列表划掉主界面也能即刻感知并释放后台
+          - 系统自动拉起自解绑：当系统在开机或异常恢复时被动拉起通知监听服务，检测到当前无前台或悬浮窗需求时自动解绑并退出
+          - 版本号升级至 1.2.7.1 (versionCode: 19)，支持无缝覆盖安装
           EOF
 
       - name: Create GitHub Release

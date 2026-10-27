@@ -54,6 +54,12 @@ internal object NotificationListenerDemand {
         }
     }
 
+    fun releaseAllImmediate() {
+        handler.removeCallbacks(releaseRunnable)
+        reasons.clear()
+        releaseAction()
+    }
+
     fun requestRebindIfNeeded(context: Context) {
         if (!isNeeded()) return
         if (isConnected()) return

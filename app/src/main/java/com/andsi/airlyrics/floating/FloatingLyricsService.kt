@@ -236,11 +236,11 @@ open class FloatingLyricsService : Service() {
             windowController.hide(notifyVisibilityChanged = false)
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
-        NotificationListenerDemand.release(
-            NotificationListenerDemand.Reason.FLOATING_SERVICE,
-            immediate = true
-        )
+        NotificationListenerDemand.releaseAllImmediate()
         stopSelf()
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            android.os.Process.killProcess(android.os.Process.myPid())
+        }, 500L)
     }
 
 

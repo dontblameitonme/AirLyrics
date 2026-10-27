@@ -60,6 +60,11 @@ class MediaNotificationListenerService : NotificationListenerService() {
             // force-stop recovery). Release the binding so the process is not pinned.
             if (BuildConfig.DEBUG) Log.d(TAG, "No listener demand, unbinding")
             performStop()
+            handler.postDelayed({
+                if (!NotificationListenerDemand.isNeeded() && !connected) {
+                    android.os.Process.killProcess(android.os.Process.myPid())
+                }
+            }, 800L)
             return
         }
         mediaSessionObserver.start()

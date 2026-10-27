@@ -26,6 +26,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        runCatching {
+            startService(android.content.Intent(this, TaskRemovalWatcherService::class.java))
+        }
         graph.onStart()
     }
 
