@@ -1,5 +1,8 @@
 package com.andsi.airlyrics.lyrics.storage
 
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
+
 import com.andsi.airlyrics.core.model.SongIdentity
 import android.content.Context
 import android.net.Uri
@@ -14,10 +17,12 @@ import java.util.concurrent.atomic.AtomicLong
  */
 object LyricsStorage {
     internal val processGeneration: String = java.util.UUID.randomUUID().toString()
-    private val storageLock = Any()
+    private val storageLock = ReentrantLock()
     private val contentRevision = AtomicLong(0L)
 
-    internal fun <T> withStorageLock(block: () -> T): T = synchronized(storageLock) { block() }
+    internal fun <T> withStorageLock(block: () -> T): T = storageLock.withLock { block() }
+
+    internal fun isWaitingForStorage(thread: Thread): Boolean = storageLock.hasQueuedThread(thread)
 
     /** Process-local signal used to reconcile visible UI after local lyrics mutations. */
     internal fun currentRevision(): Long = contentRevision.get()
@@ -25,6 +30,12 @@ object LyricsStorage {
     internal fun markContentChanged() {
         contentRevision.incrementAndGet()
     }
+
+    internal fun replaceSavedLyrics(
+        context: Context,
+        item: LocalLyricsItem,
+        document: com.andsi.airlyrics.lyrics.importer.BatchLyricsDocument
+    ): LyricsReplacementOps.Result = LyricsReplacementOps.replace(context, item, document)
 
     const val SOURCE_PROVIDER_CACHE = "provider_cache"
     const val SOURCE_MANUAL_IMPORT = "manual_import"

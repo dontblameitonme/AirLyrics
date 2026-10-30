@@ -3,6 +3,7 @@ package com.andsi.airlyrics.app
 import com.andsi.airlyrics.ui.state.restoreOperationConfirmation
 import com.andsi.airlyrics.ui.state.restoreAuxiliaryDialogs
 import com.andsi.airlyrics.app.host.observeEditorSession
+import com.andsi.airlyrics.app.host.observeBatchLyricsSession
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -109,7 +110,9 @@ internal class MainGraph(
         onLyricsFileResult = viewModel::handleLyricsFileResult,
         onFloatingFontFileResult = viewModel::importFloatingFont,
         onLyricsDirectorySelected = { uri -> lyricsWorkflow.handleLyricsDirectorySelected(uri) },
-        onNotificationPermissionResult = ::handleNotificationPermissionResult
+        onNotificationPermissionResult = ::handleNotificationPermissionResult,
+        onBatchLyricsFilesResult = { viewModel.batchLyricsSession(activity.applicationContext).filesSelected(it) },
+        onBatchLyricsExportResult = { viewModel.batchLyricsSession(activity.applicationContext).exportDestinationSelected(it) }
     )
 
     val uiHost: MainActivityUiHost by lazy { MainActivityUiHost(this) }
@@ -170,6 +173,7 @@ internal class MainGraph(
         lastRenderedState = state
         lyricsWorkflow.restorePendingOverwriteConfirmation()
         uiHost.observeEditorSession()
+        uiHost.observeBatchLyricsSession()
         uiHost.contentContainer?.post {
             if (!destroyed) restoreInteractionWindows()
         }
@@ -283,6 +287,8 @@ internal class MainGraph(
     }
 
     fun handleBackNavigation(): Boolean {
+        if (state.currentPage == Page.SETTINGS && state.settingsSubPage == SettingsSubPage.SAVED_LYRICS &&
+            uiHost.savedLyricsSelectionBackHandler?.invoke() == true) return true
         if (state.currentPage == Page.FLOATING && uiHost.floatingPanelBackHandler?.invoke() == true) {
             return true
         }
@@ -389,12 +395,13 @@ internal class MainGraph(
 
     fun deleteSavedLyrics(
         item: LyricsStorage.LocalLyricsItem,
-        onCompleted: (Boolean) -> Unit
+        onCompleted: (Boolean) -> Unit,
+        dispatchCompletion: (() -> Unit) -> Unit = { it() }
     ) {
         val deletion = viewModel.deleteSavedLyricsItem(item)
         activity.lifecycleScope.launch {
             val deleted = deletion.await()
-            if (canRenderUi()) onCompleted(deleted)
+            dispatchCompletion { if (canRenderUi()) onCompleted(deleted) }
         }
     }
 
