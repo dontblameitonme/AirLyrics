@@ -1,0 +1,88 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build APK and Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager "ndk;26.3.11579264"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.3.11579264" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/26.3.11579264" >> "$GITHUB_ENV"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: aarch64-linux-android
+
+      - name: Install cargo-ndk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Prepare Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK with Rust core
+        run: ./gradlew :app:assembleDebug --stacktrace
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AirLyrics-arm64-v8a
+          path: app/build/outputs/apk/debug/*.apk
+
+      - name: Prepare Release Asset and Notes
+        run: |
+          mkdir -p release-assets
+          TAG_NAME="${GITHUB_REF_NAME:-v1.2.7-lyricspage.4}"
+          cp app/build/outputs/apk/debug/*.apk "release-assets/AirLyrics-${TAG_NAME}-arm64-v8a.apk"
+          cat << 'EOF' > release_notes.md
+          ### AirLyrics 应用内歌词页测试版 v1.2.7-lyricspage.4
+
+          - **保留并同步完整应用内歌词页特性**：极简首页歌词展示、播放控制条、网易云热门评论、AI 歌曲解读与多轮 Q&A 对话、Monet 壁纸/封面动态取色
+          - **合并上游 AirLyrics:main 最新功能**：已保存歌词批量管理、LDDC 逐字 LRC 导入支持
+          - **划掉后台自觉停止保活**：任务卡片被划掉时立即撤销所有通知监听需求，触发系统解绑并主动退出进程，黑域不再常驻提示"通知侦听器"
+          - **增加 TaskRemovalWatcherService**：即使未启动悬浮窗，在多任务列表划掉主界面也能即刻感知并释放后台
+          - **包名与版本**：包名 `com.andsi.airlyrics.inapplyrics`，可无缝覆盖升级 `lyricspage.2` / `lyricspage.3`
+          EOF
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          if [ -z "$TAG_NAME" ] || [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            TAG_NAME="v1.2.7-lyricspage.4"
+          fi
+          gh release create "$TAG_NAME" release-assets/*.apk \
+            --title "AirLyrics $TAG_NAME" \
+            --notes-file release_notes.md

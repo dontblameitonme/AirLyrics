@@ -269,6 +269,7 @@ object FloatingLyricsFontStore {
     }
 
     private fun replaceCustomFontAtomically(source: File, destination: File): Boolean {
+        destination.parentFile?.mkdirs()
         val atomicFile = AtomicFile(destination)
         val output = runCatching { atomicFile.startWrite() }.getOrNull() ?: return false
         return try {
@@ -319,6 +320,7 @@ object FloatingLyricsFontStore {
     private fun sanitizeDisplayName(value: String): String {
         return value
             .substringAfterLast('/')
+            .substringAfterLast('\\')
             .filterNot { it.isISOControl() }
             .trim()
             .take(120)

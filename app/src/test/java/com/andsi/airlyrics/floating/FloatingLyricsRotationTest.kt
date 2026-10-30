@@ -35,7 +35,7 @@ class FloatingLyricsRotationTest {
     @Before fun setup() {
         application = ApplicationProvider.getApplicationContext()
         application.getSharedPreferences("floating_lyrics_style", Context.MODE_PRIVATE).edit().clear().commit()
-        shadowOf(application).grantPermissions("com.andsi.airlyrics.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
+        shadowOf(application).grantPermissions("${application.packageName}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
         ShadowSettings.setCanDrawOverlays(true)
         RuntimeEnvironment.setQualifiers("w400dp-h800dp-port")
         ShadowDisplayManager.changeDisplay(0, "w400dp-h800dp-port")

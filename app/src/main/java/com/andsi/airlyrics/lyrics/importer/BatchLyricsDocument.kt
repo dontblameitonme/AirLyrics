@@ -33,7 +33,7 @@ internal object BatchLyricsDocumentReader {
             context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
                 if (it.moveToFirst()) it.getString(0) else null
             }
-        }.getOrNull() ?: uri.lastPathSegment.orEmpty()
+        }.getOrNull() ?: uri.lastPathSegment.orEmpty().substringAfterLast('\\')
         return runCatching {
             when (val read = LyricsFileStore.readTextFromUriWithResult(context, uri)) {
                 LyricsFileStore.ReadTextResult.TooLarge -> Result(name, failure = Failure.TOO_LARGE)

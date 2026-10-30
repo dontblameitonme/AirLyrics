@@ -34,7 +34,7 @@ class ServiceLocaleTest {
 
     @Before
     fun grantInternalBroadcastPermission() {
-        shadowOf(application).grantPermissions("com.andsi.airlyrics.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
+        shadowOf(application).grantPermissions("${application.packageName}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
     }
 
     @Test

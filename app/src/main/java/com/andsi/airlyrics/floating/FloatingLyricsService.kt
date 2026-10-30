@@ -27,6 +27,7 @@ import com.andsi.airlyrics.lyrics.LyricsLookupRunner
 import com.andsi.airlyrics.lyrics.LyricsProviderResult
 import com.andsi.airlyrics.lyrics.LyricsRepository
 import com.andsi.airlyrics.media.CurrentMediaBroadcast
+import com.andsi.airlyrics.media.NotificationListenerDemand
 import com.andsi.airlyrics.media.MediaSourceStore
 import com.andsi.airlyrics.media.model.CurrentMediaInfo
 import com.andsi.airlyrics.settings.store.AppSettingsStore
@@ -190,6 +191,10 @@ open class FloatingLyricsService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        NotificationListenerDemand.acquire(
+            this,
+            NotificationListenerDemand.Reason.FLOATING_SERVICE
+        )
         localizedContentLanguageTags = resources.configuration.locales.toLanguageTags()
 
         selectedSourcePackage = MediaSourceStore.getSelectedPackage(this)
@@ -226,6 +231,19 @@ open class FloatingLyricsService : Service() {
         }
 
         return START_STICKY
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        if (isWindowControllerReady()) {
+            windowController.hide(notifyVisibilityChanged = false)
+        }
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        NotificationListenerDemand.releaseAllImmediate()
+        stopSelf()
+        Handler(Looper.getMainLooper()).postDelayed({
+            android.os.Process.killProcess(android.os.Process.myPid())
+        }, 300L)
     }
 
     private fun registerMediaReceiver() {
@@ -283,6 +301,9 @@ open class FloatingLyricsService : Service() {
             windowController.hide(notifyVisibilityChanged = false)
         }
         broadcastWindowVisibility(false)
+        NotificationListenerDemand.release(
+            NotificationListenerDemand.Reason.FLOATING_SERVICE
+        )
         super.onDestroy()
     }
 

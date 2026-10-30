@@ -93,13 +93,14 @@ android {
     ndkVersion = "26.3.11579264"
 
     defaultConfig {
-        applicationId = "com.andsi.airlyrics"
+        applicationId = providers.gradleProperty("airlyrics.applicationId").orNull?.takeIf { it.isNotBlank() } ?: "com.andsi.airlyrics.inapplyrics"
+        resValue("string", "app_name", "AirLyrics 测试版")
         buildConfigField("String", "SPICY_CLIENT_KEY", "\"$spicyClientKey\"")
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 36
-        versionCode = 18
-        versionName = "1.2.7"
+        versionCode = 19
+        versionName = "1.2.7-lyricspage.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -138,6 +139,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        resValues = true
     }
 
     dependenciesInfo {

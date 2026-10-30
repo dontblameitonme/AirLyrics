@@ -1,9 +1,11 @@
 package com.andsi.airlyrics.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.andsi.airlyrics.app.viewmodel.MainViewModel
+import com.andsi.airlyrics.media.NotificationListenerDemand
 
 class MainActivity : AppCompatActivity() {
     internal val mainViewModel: MainViewModel by viewModels {
@@ -25,11 +27,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        runCatching {
+            startService(Intent(this, TaskRemovalWatcherService::class.java))
+        }
         graph.onStart()
     }
 
     override fun onResume() {
         super.onResume()
+        NotificationListenerDemand.requestRebindIfNeeded(this)
         graph.onResume()
     }
 

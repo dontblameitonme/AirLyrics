@@ -16,6 +16,7 @@ import com.andsi.airlyrics.lyrics.storage.LyricsStorage
 import com.andsi.airlyrics.lyrics.storage.PREFS_NAME
 import com.andsi.airlyrics.media.CurrentMediaBroadcast
 import com.andsi.airlyrics.media.MediaSourceStore
+import com.andsi.airlyrics.media.NotificationListenerDemand
 import com.andsi.airlyrics.media.model.CurrentMediaInfo
 import com.andsi.airlyrics.settings.store.FloatingLyricsStyleStore
 import com.andsi.airlyrics.settings.store.QuickFloatingStore
@@ -96,6 +97,41 @@ class FloatingLyricsServiceCommandLifecycleTest {
         assertFalse(service.windowController.isVisible)
         assertNull(service.lyricsView)
         assertFalse(windowManager.views.any { it === firstView })
+    }
+
+    @Test
+    fun service_onTaskRemoved_hidesWindow() {
+        val controller = Robolectric.buildService(FloatingLyricsService::class.java)
+            .create()
+            .also { serviceController = it }
+        val service = controller.get()
+        val windowManager = shadowWindowManager(service)
+        send(service, FloatingServiceCommand.Show, startId = 1)
+        val firstView = requireNotNull(service.lyricsView)
+        assertTrue(service.windowController.isVisible)
+        assertTrue(windowManager.views.any { it === firstView })
+
+        service.onTaskRemoved(android.content.Intent())
+
+        assertFalse(service.windowController.isVisible)
+        assertNull(service.lyricsView)
+        assertFalse(windowManager.views.any { it === firstView })
+    }
+
+    @Test
+    fun service_holdsListenerDemandUntilTaskRemoved() {
+        var releases = 0
+        NotificationListenerDemand.releaseAction = { releases++ }
+        val controller = Robolectric.buildService(FloatingLyricsService::class.java)
+            .create()
+            .also { serviceController = it }
+        val service = controller.get()
+        assertTrue(NotificationListenerDemand.isNeeded())
+
+        service.onTaskRemoved(android.content.Intent())
+
+        assertFalse(NotificationListenerDemand.isNeeded())
+        assertEquals(1, releases)
     }
 
     @Test
@@ -371,6 +407,7 @@ class FloatingLyricsServiceCommandLifecycleTest {
     }
 
     private fun resetState() {
+        NotificationListenerDemand.resetForTest()
         application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
             .clear()

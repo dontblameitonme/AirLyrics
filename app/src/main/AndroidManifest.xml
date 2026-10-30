@@ -53,6 +53,10 @@
         </activity>
 
         <service
+            android:name=".app.TaskRemovalWatcherService"
+            android:exported="false" />
+
+        <service
             android:name=".floating.FloatingLyricsService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
